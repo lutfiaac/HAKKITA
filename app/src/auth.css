@@ -1,0 +1,231 @@
+.auth-header {
+  border-bottom: 1px solid #edf0f4;
+  background: #fff;
+}
+.auth-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  min-height: 80px;
+}
+.auth-header .brand {
+  width: 136px;
+}
+.auth-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.auth-main {
+  background: #fff;
+  min-height: calc(100dvh - 80px);
+  padding: 36px 24px 40px;
+}
+.auth-layout {
+  width: 100%;
+  max-width: 440px;
+  margin-inline: auto;
+  color: #1b304c;
+}
+.auth-intro {
+  margin-bottom: 24px;
+}
+.auth-intro h1 {
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+.auth-intro p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #687385;
+  margin: 0;
+}
+.auth-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 18px;
+  border: 1px solid #d7e0ea;
+  border-radius: 10px;
+  background: #fff;
+  color: #1b304c;
+  font-size: 15px;
+  font-weight: 500;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #687385;
+  font-size: 13px;
+  margin: 20px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  background: #e1e7ee;
+  flex: 1;
+}
+.auth-availability {
+  background: #f5f8fc;
+  border: 1px solid #e1e8f1;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #536477;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.auth-field label {
+  font-size: 14px;
+  font-weight: 500;
+}
+.auth-field input {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid #d7e0ea;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: #1b304c;
+  margin: 0;
+}
+.auth-field input::placeholder {
+  color: #768292;
+}
+.auth-field input:disabled {
+  background: #f8f9fb;
+  color: #687385;
+  opacity: 1;
+  cursor: not-allowed;
+}
+.auth-password {
+  position: relative;
+}
+.auth-password input {
+  padding-right: 50px;
+}
+.auth-password > button {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #617087;
+  border-radius: 8px;
+}
+.auth-forgot {
+  align-self: flex-end;
+  font-size: 13px;
+  margin-top: -7px;
+}
+.auth-form .auth-submit {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 10px;
+  background: #1769c2;
+  color: #fff;
+  font-size: 15px;
+  margin: 0;
+}
+.auth-form .auth-submit:hover:not(:disabled) {
+  background: #1458a3;
+}
+.auth-submit:disabled,
+.auth-google:disabled {
+  background: #f0f3f7;
+  color: #637085;
+  border-color: #d7e0ea;
+  opacity: 1;
+  cursor: not-allowed;
+}
+.auth-password > button:disabled {
+  cursor: not-allowed;
+}
+.auth-field-error {
+  margin: 0;
+  color: #a13239;
+  font-size: 13px;
+}
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+  color: #687385;
+  margin: 22px 0 16px;
+}
+.auth-switch a {
+  font-weight: 600;
+}
+.auth-guest {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  margin: 0;
+  padding-block: 8px;
+}
+.auth-privacy {
+  font-size: 12px;
+  line-height: 1.65;
+  text-align: center;
+  color: #687385;
+  margin: 22px 0 0;
+}
+.auth-status {
+  font-size: 14px;
+  color: #536477;
+  line-height: 1.6;
+  padding: 12px 14px;
+  border: 1px solid #e1e7ee;
+  border-radius: 10px;
+}
+.account-menu .demo-session-indicator {
+  font-size: 11px;
+  color: #687385;
+  font-weight: 400;
+  margin-top: -6px;
+}
+@media (max-width: 640px) {
+  .auth-header-inner {
+    min-height: 68px;
+    gap: 16px;
+  }
+  .auth-header .brand {
+    width: 120px;
+  }
+  .auth-home-link {
+    font-size: 12px;
+    gap: 6px;
+  }
+  .auth-main {
+    min-height: calc(100dvh - 68px);
+    padding: 28px 20px 32px;
+  }
+  .auth-intro h1 {
+    font-size: 30px;
+  }
+}
