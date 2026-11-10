@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CaretDown, SlidersHorizontal, X } from "@phosphor-icons/react";
 import { programCategories } from "./data.js";
 import { targetGroups } from "./taxonomy";
@@ -25,7 +25,9 @@ export function ProgramCatalog({
 }) {
   const [targetsOpen, setTargetsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const closeAdvanced = useCallback(() => setAdvancedOpen(false), []);
+  const closeMobileFilters = useCallback(() => setMobileFiltersOpen(false), []);
   const targetsRef = useRef(null),
     targetTrigger = useRef(null);
   useEffect(() => {
@@ -101,14 +103,33 @@ export function ProgramCatalog({
         subtitle="Temukan informasi bantuan, beasiswa, peluang karier, dan berbagai program yang sesuai kebutuhanmu."
       />
       <div className="program-discovery-controls">
-        <Search
-          key={values.q}
-          navigate={navigate}
-          initial={values.q}
-          type="program"
-          compact
-          onSearch={(query) => update("q", query)}
-        />
+        <div className="program-search-row">
+          <Search
+            key={values.q}
+            navigate={navigate}
+            initial={values.q}
+            type="program"
+            compact
+            onSearch={(query) => update("q", query)}
+          />
+          <button
+            type="button"
+            className="program-mobile-filter-trigger"
+            aria-label="Buka filter program"
+            aria-haspopup="dialog"
+            aria-expanded={mobileFiltersOpen}
+            data-active={chips.some((chip) => chip.key !== "q") || undefined}
+            onClick={() => {
+              setTargetsOpen(false);
+              setMobileFiltersOpen(true);
+            }}
+          >
+            <SlidersHorizontal size={22} aria-hidden="true" />
+            {chips.some((chip) => chip.key !== "q") && (
+              <span className="program-filter-active-dot" aria-hidden="true" />
+            )}
+          </button>
+        </div>
         <div className="program-filter-bar" aria-label="Filter program">
           <div>
             <label className="sr-only" htmlFor="category-filter">
@@ -335,6 +356,14 @@ export function ProgramCatalog({
           values={values}
           onApply={applyAdvanced}
           onClose={closeAdvanced}
+        />
+      )}
+      {mobileFiltersOpen && (
+        <ProgramAdvancedFilters
+          values={values}
+          onApply={applyAdvanced}
+          onClose={closeMobileFilters}
+          allFilters
         />
       )}
     </div>

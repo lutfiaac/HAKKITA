@@ -13,7 +13,6 @@
 .program-detail-overview {
   grid-area: overview;
   min-width: 0;
-  border-bottom: 1px solid #e1e7ee;
   padding-bottom: 24px;
   margin-bottom: 24px;
 }
@@ -164,6 +163,11 @@
   padding: 13px 0;
   border-bottom: 1px solid #edf0f4;
 }
+.program-detail-documents > li:last-child,
+.program-official-sources li:last-child,
+.program-periods li:last-child {
+  border-bottom: 0;
+}
 .program-detail-documents > li > svg {
   color: #1769c2;
   flex-shrink: 0;
@@ -268,8 +272,8 @@
 }
 .program-notice-outdated,
 .program-notice-conflicting {
-  background: #faf8f4;
-  border: 1px solid #e6ded1;
+  background: var(--cream);
+  border: 1px solid var(--cream-accent-border);
 }
 .program-detail-content .program-data-note {
   font-size: 15px;

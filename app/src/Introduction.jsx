@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowRight } from "@phosphor-icons/react";
 
 export function Introduction() {

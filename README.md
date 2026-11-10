@@ -17,6 +17,5 @@ Preview sesi ini: http://127.0.0.1:4173/
 ## Dokumentasi
 
 - [Laporan implementasi, sumber, dan batasan](app/IMPLEMENTATION.md)
-- [Status pemeriksaan visual](app/design-qa.md)
 
 Stack: React 19, Vite 6, modul TypeScript, CSS responsif, Geist lokal, Phosphor Icons. Pencarian dan rekomendasi memakai katalog lokal. Akun contoh menggunakan alamat `@example.test` tanpa password, dengan simpanan terpisah per identitas di browser ini. Jawaban ekonomi tambahan hanya berada dalam memori sesi. Tidak ada akun server, unggahan dokumen identitas, pengajuan pemerintah, atau sinkronisasi lintas perangkat.

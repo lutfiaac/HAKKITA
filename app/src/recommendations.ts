@@ -72,7 +72,7 @@ export function recommendPrograms(
           ? interests.includes(item.primaryCategory) ||
             item.secondaryCategories.some((c) => interests.includes(c))
           : targets.some((t) => item.targetGroups.includes(t))) &&
-        (item.regionCoverage.level === "national" ||
+        (!item.regionCoverage || item.regionCoverage.level === "national" ||
           !profile.province ||
           item.regionCoverage.provinces.includes(profile.province)),
     )
@@ -85,7 +85,7 @@ export function recommendPrograms(
         reasons.push("Bidang program sesuai dengan minat yang kamu pilih.");
       if (targets.some((t) => item.targetGroups.includes(t)))
         reasons.push("Sasaran program mencakup kegiatan yang kamu pilih.");
-      if (profile.province && item.regionCoverage.level === "national")
+      if (profile.province && item.regionCoverage?.level === "national")
         reasons.push(
           `Cakupan program nasional, termasuk ${profile.province}; lokasi pelaksanaan tetap perlu diperiksa.`,
         );

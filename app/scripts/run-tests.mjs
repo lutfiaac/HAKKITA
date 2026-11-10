@@ -50,6 +50,7 @@ const result = spawnSync(
     "--test",
     "--test-isolation=none",
     "tests/data.test.mjs",
+    "tests/service-catalog.test.mjs",
     "tests/program-detail.test.mjs",
     "tests/auth.test.mjs",
     "tests/homepage-featured.test.mjs",

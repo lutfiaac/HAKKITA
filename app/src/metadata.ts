@@ -263,25 +263,30 @@ export const programMetadata: Record<string, ProgramMetadata> = {
 };
 const service = (
   primaryCategory: ServiceMetadata["primaryCategory"],
+  serviceSubcategory: ServiceMetadata["serviceSubcategory"],
   aliases: string[],
-  channels: ServiceMetadata["serviceChannels"] = ["online", "offline"],
-  regionCoverage: ServiceMetadata["regionCoverage"] = national,
+  channels: ServiceMetadata["serviceChannels"],
+  regionCoverage: ServiceMetadata["regionCoverage"],
+  governmentLevel: ServiceMetadata["governmentLevel"] = "pusat",
 ): ServiceMetadata => ({
   primaryCategory,
+  serviceSubcategory,
   aliases,
   serviceChannels: channels,
   regionCoverage,
   applicantType: "wni",
-  governmentLevel: regionCoverage.level === "national" ? "pusat" : "daerah",
+  governmentLevel,
   locations: [],
 });
 export const serviceMetadata: Record<string, ServiceMetadata> = {
   "ktp-el": service(
     "kependudukan",
+    "kependudukan",
     [
       "ktp",
       "e-ktp",
       "ktp elektronik",
+      "kartu tanda penduduk",
       "bikin ktp",
       "ktp hilang",
       "ktp rusak",
@@ -289,41 +294,61 @@ export const serviceMetadata: Record<string, ServiceMetadata> = {
     ],
     ["online", "offline"],
     { level: "province", provinces: ["DKI Jakarta"], cities: [] },
+    "daerah",
   ),
-  "perpanjangan-sim": service("transportasi", [
-    "sim",
-    "perpanjang sim",
-    "surat izin mengemudi",
-  ]),
-  paspor: service("imigrasi", [
-    "passport",
-    "paspor baru",
-    "bikin paspor",
+  // Channels and coverage describe the actual guide, not the agency's reach.
+  "perpanjangan-sim": service(
+    "transportasi",
+    "transportasi",
+    ["sim", "perpanjang sim", "surat izin mengemudi", "sinar"],
+    ["online"],
+    national,
+  ),
+  paspor: service(
+    "kependudukan",
     "imigrasi",
-  ]),
+    ["passport", "paspor baru", "bikin paspor", "imigrasi", "m-paspor"],
+    ["online", "offline"],
+    { level: "city", provinces: ["DKI Jakarta"], cities: ["Jakarta Pusat"] },
+  ),
   "mobile-jkn": service(
+    "jaminan-sosial",
     "jaminan-sosial",
     ["bpjs", "jkn", "bpjs kesehatan", "daftar bpjs"],
     ["online"],
+    national,
   ),
   npwp: service(
     "pajak",
+    "pajak",
     ["bikin npwp", "daftar npwp", "nomor pokok wajib pajak", "coretax"],
     ["online"],
+    national,
   ),
-  skck: service("hukum", [
-    "catatan kepolisian",
-    "surat kelakuan baik",
-    "bikin skck",
-  ]),
+  skck: service(
+    "kependudukan",
+    "hukum",
+    [
+      "catatan kepolisian",
+      "surat kelakuan baik",
+      "bikin skck",
+      "pembuatan skck",
+    ],
+    ["online", "offline"],
+    national,
+  ),
   nib: service(
+    "pekerjaan-usaha",
     "perizinan",
     ["bikin nib", "nomor induk berusaha", "oss", "izin usaha"],
     ["online"],
+    national,
   ),
   lapor: service(
     "pengaduan",
+    "pengaduan",
     ["lapor", "pengaduan", "keluhan pelayanan publik", "sp4n"],
     ["online"],
+    national,
   ),
 };

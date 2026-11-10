@@ -1,7 +1,17 @@
-import { programCategories, serviceCategories } from "./taxonomy.ts";
+import {
+  programCategories,
+  serviceCategories,
+  serviceSubcategoryNames,
+} from "./taxonomy.ts";
+import {
+  normalizeSearchText,
+  matchesServiceChannel,
+  matchesServiceRegion,
+} from "./service-catalog.js";
 import { programMetadata, serviceMetadata } from "./metadata.ts";
 import { additionalItems } from "./additional-data.js";
 import { regionalPrograms } from "./regional-programs.js";
+import { newServiceGuides } from "./service-guides.js";
 import { evaluateRules } from "./recommendations.ts";
 import { programTimelines, registrationStatus } from "./program-timeline.js";
 export { programCategories, serviceCategories };
@@ -255,7 +265,7 @@ const baseCatalog = [
     agency: "Korps Lalu Lintas POLRI",
     region: "Nasional; mengikuti ketersediaan SATPAS",
     summary:
-      "Perpanjang SIM A atau SIM C melalui layanan SINAR di aplikasi Digital Korlantas POLRI.",
+      "Ketahui dokumen dan prosedur perpanjangan SIM A atau SIM C melalui SINAR di Digital Korlantas POLRI.",
     about:
       "Layanan perpanjangan SIM secara online dengan verifikasi oleh SATPAS.",
     requirements: [
@@ -362,15 +372,16 @@ const baseCatalog = [
     related: ["ktp-el"],
   },
 ];
-export const catalog = [
+export const originalCatalog = [
   ...baseCatalog,
   ...additionalItems,
   ...regionalPrograms,
+  ...newServiceGuides,
 ].map((item) => {
   const metadata =
     item.type === "program"
       ? programMetadata[item.id]
-      : serviceMetadata[item.id];
+      : serviceMetadata[item.id] || item;
   return {
     ...item,
     ...metadata,
@@ -388,9 +399,12 @@ export const catalog = [
     applicationSteps: item.steps || [],
     relatedServices: item.related.filter(
       (id) =>
-        [...baseCatalog, ...additionalItems, ...regionalPrograms].find(
-          (x) => x.id === id,
-        )?.type === "layanan",
+        [
+          ...baseCatalog,
+          ...additionalItems,
+          ...regionalPrograms,
+          ...newServiceGuides,
+        ].find((x) => x.id === id)?.type === "layanan",
     ),
     secondaryCategories: metadata.secondaryCategories || [],
     aliases: metadata.aliases || [],
@@ -399,9 +413,38 @@ export const catalog = [
     processingTime: null,
   };
 });
-export const programs = catalog.filter((item) => item.type === "program");
-export const services = catalog.filter((item) => item.type === "layanan");
+export let catalog = [...originalCatalog];
+export let programs = catalog.filter((item) => item.type === "program");
+export let services = catalog.filter((item) => item.type === "layanan");
+let catalogRevision = 0;
+const catalogListeners = new Set();
+export const subscribeCatalog = (listener) => { catalogListeners.add(listener); return () => catalogListeners.delete(listener); };
+export const getCatalogRevision = () => catalogRevision;
+export function replacePublishedContent(overlays) {
+  const ids = new Set(originalCatalog.map((item) => item.id));
+  catalog = [...originalCatalog.map((item) => overlays[item.id] || item), ...Object.values(overlays).filter((item) => !ids.has(item.id))];
+  programs = catalog.filter((item) => item.type === "program");
+  services = catalog.filter((item) => item.type === "layanan");
+  catalogRevision += 1;
+  catalogListeners.forEach((listener) => listener());
+}
 export const findItem = (id) => catalog.find((item) => item.id === id);
+export const savedItemKey = (item, variant = "") =>
+  `${item.type}:${item.id}${variant ? `:${variant}` : ""}`;
+export const legacySavedItemKey = (item, variant = "") =>
+  item.id + (variant ? `:${variant}` : "");
+export function parseSavedItemKey(key = "") {
+  const parts = key.split(":");
+  if (parts[0] === "program" || parts[0] === "layanan")
+    return { type: parts[0], id: parts[1] || "", variant: parts[2] || "" };
+  return { type: "", id: parts[0] || "", variant: parts[1] || "" };
+}
+export function hasSavedItem(plans, item, variant = "") {
+  return Boolean(
+    plans[savedItemKey(item, variant)] ||
+      plans[legacySavedItemKey(item, variant)],
+  );
+}
 export const categoryName = (id) =>
   categories.find((c) => c.id === id)?.name || id;
 export function filterCatalog({
@@ -418,38 +461,39 @@ export function filterCatalog({
   channel = "",
   verifiedPeriod = false,
   periodStatus = "",
+  items = catalog,
 } = {}) {
-  const terms = query
-    .toLocaleLowerCase("id")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  return catalog.filter((item) => {
+  const terms = normalizeSearchText(query).split(/\s+/).filter(Boolean);
+  return items.filter((item) => {
     const coverage = item.regionCoverage;
     const inRegion =
-      !region ||
-      (region === "nasional"
-        ? coverage?.level === "national"
-        : coverage?.level === "national" ||
-          coverage?.provinces?.includes(
-            region === "jakarta" ? "DKI Jakarta" : region,
-          ));
-    const haystack = [
-      item.name,
-      item.summary,
-      item.agency,
-      categoryName(item.category),
-      item.id,
-      ...item.aliases,
-      ...(item.variants || []).map((v) => v.name + " " + v.id),
-    ]
-      .join(" ")
-      .toLocaleLowerCase("id");
+      item.type === "layanan"
+        ? matchesServiceRegion(item, region)
+        : !region ||
+          (region === "nasional"
+            ? coverage?.level === "national"
+            : coverage?.level === "national" ||
+              coverage?.provinces?.includes(
+                region === "jakarta" ? "DKI Jakarta" : region,
+              ));
+    const haystack = normalizeSearchText(
+      [
+        item.name,
+        item.summary,
+        item.agency,
+        categoryName(item.category),
+        item.id,
+        serviceSubcategoryNames[item.serviceSubcategory] || "",
+        ...(item.aliases || []),
+        ...(item.variants || []).map((v) => v.name + " " + v.id),
+      ].join(" "),
+    );
     return (
       (!type || item.type === type) &&
       (!category ||
         item.category === category ||
-        item.secondaryCategories.includes(category)) &&
+        item.serviceSubcategory === category ||
+        item.secondaryCategories?.includes(category)) &&
       inRegion &&
       (!city ||
         Boolean(
@@ -470,7 +514,7 @@ export function filterCatalog({
       (!level || item.governmentLevel === level) &&
       (!education || item.educationLevels?.includes(education)) &&
       (!activity || item.employmentStatuses?.includes(activity)) &&
-      (!channel || item.serviceChannels?.includes(channel)) &&
+      matchesServiceChannel(item, channel) &&
       (!verifiedPeriod || Boolean(item.enrollmentPeriod)) &&
       (!periodStatus || registrationStatus(item) === periodStatus) &&
       terms.every((term) => haystack.includes(term))

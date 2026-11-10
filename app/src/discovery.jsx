@@ -1,30 +1,24 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
   ArrowLeft,
-  CaretRight,
   SlidersHorizontal,
-  BookmarkSimple,
-  Check,
-  Info,
-  FileText,
-  MapPin,
   X,
 } from "@phosphor-icons/react";
 import {
-  catalog,
   programCategories,
   serviceCategories,
   filterCatalog,
   categoryName,
   findItem,
-  VERIFIED,
+  hasSavedItem,
 } from "./data.js";
 import { provinces, targetGroups } from "./taxonomy";
-import { useAccount } from "./AccountContext";
-import { recommendPrograms } from "./recommendations";
 import { ProgramCatalog } from "./ProgramCatalog.jsx";
+import { ServiceCatalog } from "./ServiceCatalog.jsx";
+import { serviceReturnPath } from "./service-catalog.js";
 import { ProgramDetail } from "./ProgramDetail.jsx";
+import { ServiceDetail } from "./ServiceDetail.jsx";
 import { sortPrograms } from "./program-timeline.js";
 import {
   Search,
@@ -53,7 +47,14 @@ function useMobile() {
   }, []);
   return mobile;
 }
-export function Catalog({ type, navigate, initialCategory = "", save, plans }) {
+export function Catalog(props) {
+  return props.type === "layanan" ? (
+    <ServiceCatalog {...props} />
+  ) : (
+    <GeneralCatalog {...props} />
+  );
+}
+function GeneralCatalog({ type, navigate, initialCategory = "", save, plans }) {
   const p = new URLSearchParams(location.search),
     mobile = useMobile(),
     [filterOpen, setFilterOpen] = useState(false);
@@ -121,7 +122,12 @@ export function Catalog({ type, navigate, initialCategory = "", save, plans }) {
   }
   function updateFilters(patch) {
     const next = { ...values, ...patch };
-    if (type === "program" && "wilayah" in patch && patch.wilayah !== region)
+    if (
+      type === "program" &&
+      "wilayah" in patch &&
+      patch.wilayah !== region &&
+      !("kabupaten" in patch)
+    )
       next.kabupaten = "";
     navigate(hrefWith(type ? `/${type}` : "/cari", next));
   }
@@ -368,46 +374,6 @@ export function Catalog({ type, navigate, initialCategory = "", save, plans }) {
           </a>
         </div>
       )}
-      {type === "layanan" && !query && !category && !active.length && (
-        <>
-          <section className="service-preview">
-            <h2>Mulai dari Layanan Ini</h2>
-            <div className="popular-grid">
-              {[
-                "ktp-el",
-                "npwp",
-                "perpanjangan-sim",
-                "paspor",
-                "skck",
-                "mobile-jkn",
-              ].map((id) => (
-                <a key={id} href={detailUrl(findItem(id))}>
-                  <Icon name={findItem(id).icon} size={22} />
-                  <span>{findItem(id).name}</span>
-                  <CaretRight size={17} />
-                </a>
-              ))}
-            </div>
-          </section>
-          <section
-            className="service-category-list"
-            id="kategori-layanan"
-            tabIndex={-1}
-            aria-labelledby="service-category-title"
-          >
-            <h2 id="service-category-title">Jelajahi berdasarkan kategori</h2>
-            <div>
-              {serviceCategories.map((c) => (
-                <a href={`/layanan/kategori/${c.id}`} key={c.id}>
-                  <Icon name={c.icon} size={20} />
-                  {c.name}
-                  <CaretRight size={15} />
-                </a>
-              ))}
-            </div>
-          </section>
-        </>
-      )}
       <div className="catalog-layout">
         <aside className="filters revised-filters">
           {mobile ? (
@@ -510,8 +476,8 @@ export function Catalog({ type, navigate, initialCategory = "", save, plans }) {
     </div>
   );
 }
-export function Detail({ item, variantId, save, plans, navigate }) {
-  const { account, sensitiveAnswers } = useAccount();
+export function Detail({ item, variantId, save, plans, navigate, onReminder }) {
+  const serviceReturn = serviceReturnPath(location.search);
   const requirementsView =
     item.type === "program" && variantId === "persyaratan";
   if (
@@ -523,17 +489,11 @@ export function Detail({ item, variantId, save, plans, navigate }) {
   const variant = item.variants?.find(
     (v) => v.id === (variantId || item.variants[0].id),
   );
-  const selected = variant || item;
-  const key = item.id + (variant ? `:${variant.id}` : "");
-  const saved = Boolean(plans[key]);
-  const evaluation =
-    account && item.type === "program"
-      ? recommendPrograms(
-          [item],
-          { ...account.profile, interests: [item.primaryCategory] },
-          sensitiveAnswers,
-        )[0]
-      : null;
+  const saved = hasSavedItem(plans, item, variant?.id || "");
+  const savedPlan =
+    plans[`${item.type}:${item.id}${variant?.id ? `:${variant.id}` : ""}`] ||
+    plans[`${item.id}${variant?.id ? `:${variant.id}` : ""}`];
+  const reminderActive = Boolean(savedPlan?.reminder?.enabled);
   if (item.type === "program")
     return (
       <ProgramDetail
@@ -541,270 +501,19 @@ export function Detail({ item, variantId, save, plans, navigate }) {
         requirementsView={requirementsView}
         save={save}
         saved={saved}
-        evaluation={evaluation}
+        reminderActive={reminderActive}
+        onReminder={() => onReminder?.(item, variant?.id || "")}
       />
     );
   return (
-    <div className="container page detail-page">
-      <Breadcrumb
-        items={[
-          {
-            label:
-              item.type === "program" ? "Kenali Hakmu" : "Jelajahi Layanan",
-            href: `/${item.type}`,
-          },
-          { label: item.name, ...(variantId ? { href: detailUrl(item) } : {}) },
-          ...(variantId
-            ? [{ label: requirementsView ? "Persyaratan" : variant.name }]
-            : []),
-        ]}
-      />
-      <div className="detail-top">
-        <div>
-          <span className="category-label">{categoryName(item.category)}</span>
-          <h1>{item.name}</h1>
-          <p>{item.summary}</p>
-          <div className="detail-meta">
-            <span>
-              <MapPin size={17} />
-              {item.region}
-            </span>
-          </div>
-        </div>
-        <div className="detail-emblem">
-          <Icon name={item.icon} size={56} weight="duotone" />
-        </div>
-      </div>
-      <div className="detail-layout">
-        <article className="detail-content">
-          {!requirementsView && (
-            <>
-              <section>
-                <h2>
-                  {item.type === "program"
-                    ? "Tentang program"
-                    : "Ringkasan layanan"}
-                </h2>
-                <p>{item.about}</p>
-              </section>
-              {item.benefits && (
-                <section>
-                  <h2>Manfaat</h2>
-                  <ul>
-                    {item.benefits.map((x) => (
-                      <li key={x}>{x}</li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-            </>
-          )}
-          {item.variants && (
-            <section>
-              <h2>Jenis pengurusan</h2>
-              <p>
-                Pilih kondisi yang sesuai untuk melihat panduan dan dokumen yang
-                dibutuhkan.
-              </p>
-              <div
-                className="segmented"
-                role="group"
-                aria-label="Jenis pengurusan"
-              >
-                {item.variants.map((v) => (
-                  <button
-                    key={v.id}
-                    aria-pressed={variant.id === v.id}
-                    className={variant.id === v.id ? "selected" : ""}
-                    onClick={() => navigate(`${detailUrl(item)}/${v.id}`)}
-                  >
-                    {v.name}
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-          <section>
-            <h2>
-              {item.type === "program"
-                ? "Sasaran dan persyaratan"
-                : "Persyaratan"}
-            </h2>
-            <ul>
-              {selected.requirements.map((x) => (
-                <li key={x}>{x}</li>
-              ))}
-            </ul>
-            {item.type === "program" && !requirementsView && (
-              <a className="text-link" href={`${detailUrl(item)}/persyaratan`}>
-                Periksa persyaratan secara rinci <ArrowRight size={17} />
-              </a>
-            )}
-          </section>
-          {evaluation && (
-            <section className="personal-rule-check">
-              <h2>Berdasarkan informasi profilmu</h2>
-              <span className="match-status">{evaluation.status}</span>
-              <ul>
-                {evaluation.rules.map((rule) => (
-                  <li key={rule.id}>
-                    <strong>
-                      {rule.state === "met"
-                        ? "Sesuai jawaban: "
-                        : rule.state === "not-met"
-                          ? "Belum sesuai: "
-                          : "Perlu diperiksa: "}
-                    </strong>
-                    {rule.label}
-                  </li>
-                ))}
-              </ul>
-              <a className="text-link" href="/profil/edit">
-                Perbarui informasi profil <ArrowRight size={16} />
-              </a>
-            </section>
-          )}
-          <section>
-            <h2>Dokumen yang perlu disiapkan</h2>
-            <ul className="document-list">
-              {selected.documents.map((x) => (
-                <li key={x}>
-                  <FileText size={20} />
-                  <span>{x}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="subtle">
-              Simpan ke Rencanaku untuk menandai persiapan dokumen.
-            </p>
-          </section>
-          {item.fee && (
-            <section>
-              <h2>Biaya resmi</h2>
-              <p>{item.fee}</p>
-            </section>
-          )}
-          {!requirementsView && (
-            <>
-              <section>
-                <h2>
-                  {item.type === "program"
-                    ? "Cara mengakses program"
-                    : "Langkah pengurusan"}
-                </h2>
-                <ol className="steps">
-                  {selected.steps.map((x, i) => (
-                    <li key={x}>
-                      <span>{i + 1}</span>
-                      <p>{x}</p>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-              {item.channel && (
-                <section>
-                  <h2>Kanal pelayanan</h2>
-                  <p>{item.channel}</p>
-                  <a
-                    className="text-link"
-                    href={hrefWith("/layanan/lokasi", { layanan: item.id })}
-                  >
-                    Periksa kanal dan lokasi pelayanan <ArrowRight size={17} />
-                  </a>
-                </section>
-              )}
-            </>
-          )}
-          {item.note && (
-            <div className="info-box">
-              <Info size={23} />
-              <div>
-                <h3>Perlu diperhatikan</h3>
-                <p>{item.note}</p>
-                {item.id === "kip-kuliah" && (
-                  <a href="/bantuan">
-                    Cara memeriksa data kesejahteraan <ArrowRight size={16} />
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
-          <section className="sources-block">
-            <h2>Sumber Informasi</h2>
-            <p>{item.agency}</p>
-            {item.sources.map((source) => (
-              <External key={source.url} href={source.url}>
-                {source.label}
-              </External>
-            ))}
-            <span className="source-date">
-              <Icon name="ShieldCheck" size={16} />
-              Diperiksa {item.lastVerifiedAt || VERIFIED}
-            </span>
-          </section>
-          {item.relatedServices?.length > 0 && (
-            <section className="contextual-services">
-              <h2>Perlu mengurus dokumen pendukung?</h2>
-              <div>
-                {item.relatedServices.map((id) => (
-                  <a href={detailUrl(findItem(id))} key={id}>
-                    {findItem(id).name}
-                    <span>
-                      Lihat Panduan Pengurusan <ArrowRight size={15} />
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
-          {requirementsView && (
-            <a href={detailUrl(item)} className="text-link">
-              <ArrowLeft size={16} />
-              Kembali ke informasi program
-            </a>
-          )}
-        </article>
-        <aside className="detail-sidebar">
-          <div className="action-panel">
-            <h2>Siap ambil langkah berikutnya?</h2>
-            <p>
-              Lanjutkan melalui kanal penyelenggara untuk informasi dan
-              pengajuan resmi.
-            </p>
-            <External href={item.official} className="button primary">
-              {item.type === "program"
-                ? "Buka Situs Resmi"
-                : "Buka Kanal Resmi"}
-            </External>
-            <button
-              className="button secondary"
-              aria-pressed={saved}
-              onClick={() => save(item, variant?.id || "")}
-            >
-              <BookmarkSimple size={19} weight={saved ? "fill" : "regular"} />
-              {saved ? "Hapus dari Rencanaku" : "Simpan ke Rencanaku"}
-            </button>
-            {saved && (
-              <a className="text-link" href="/rencanaku">
-                Buka Rencanaku <ArrowRight size={17} />
-              </a>
-            )}
-            <p className="panel-note">
-              Tidak perlu memasukkan NIK atau mengunggah dokumen di Hakkita.
-            </p>
-          </div>
-          <div className="related">
-            <h3>Mungkin kamu juga membutuhkan</h3>
-            {item.related.map((id) => (
-              <a key={id} href={detailUrl(findItem(id))}>
-                {findItem(id).name}
-                <CaretRight size={17} />
-              </a>
-            ))}
-          </div>
-        </aside>
-      </div>
-    </div>
+    <ServiceDetail
+      item={item}
+      variant={variant}
+      navigate={navigate}
+      saved={saved}
+      save={save}
+      serviceReturn={serviceReturn}
+    />
   );
 }
 export function ServiceLocations() {

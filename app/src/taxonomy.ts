@@ -46,15 +46,9 @@ export const programCategories: Category[] = [
 export const serviceCategories: Category[] = [
   {
     id: "kependudukan",
-    name: "Kependudukan & Catatan Sipil",
+    name: "Kependudukan & Dokumen Pribadi",
     icon: "IdentificationCard",
     description: "Identitas dan dokumen kependudukan.",
-  },
-  {
-    id: "pajak",
-    name: "Perpajakan",
-    icon: "Receipt",
-    description: "NPWP dan administrasi perpajakan.",
   },
   {
     id: "transportasi",
@@ -63,60 +57,57 @@ export const serviceCategories: Category[] = [
     description: "Dokumen pengemudi dan kendaraan.",
   },
   {
-    id: "imigrasi",
-    name: "Perjalanan & Keimigrasian",
-    icon: "AirplaneTilt",
-    description: "Paspor dan administrasi perjalanan.",
-  },
-  {
     id: "jaminan-sosial",
     name: "Kesehatan & Jaminan Sosial",
     icon: "Heartbeat",
     description: "Kepesertaan jaminan kesehatan dan sosial.",
   },
   {
-    id: "perizinan",
-    name: "Usaha & Perizinan",
-    icon: "Storefront",
-    description: "Identitas usaha dan panduan perizinan.",
+    id: "pekerjaan-usaha",
+    name: "Pekerjaan & Usaha",
+    icon: "Briefcase",
+    description: "Administrasi pekerjaan, identitas usaha, dan perizinan.",
+  },
+  {
+    id: "pajak",
+    name: "Perpajakan",
+    icon: "Receipt",
+    description: "Perpajakan dan administrasi kewajiban keuangan.",
   },
   {
     id: "akademik",
     name: "Pendidikan & Dokumen Akademik",
     icon: "Books",
-    description: "Data dan dokumen pendidikan.",
-  },
-  {
-    id: "ketenagakerjaan",
-    name: "Pekerjaan & Ketenagakerjaan",
-    icon: "Briefcase",
-    description: "Administrasi kerja dan pencari kerja.",
+    description: "Data mahasiswa, ijazah, dan dokumen pendidikan.",
   },
   {
     id: "pertanahan",
     name: "Pertanahan & Bangunan",
     icon: "House",
-    description: "Pertanahan dan administrasi bangunan.",
-  },
-  {
-    id: "hukum",
-    name: "Hukum & Kepolisian",
-    icon: "ShieldCheck",
-    description: "SKCK dan layanan kepolisian.",
-  },
-  {
-    id: "daerah",
-    name: "Administrasi Pemerintah Daerah",
-    icon: "Buildings",
-    description: "Layanan administrasi daerah sesuai domisili.",
+    description: "Administrasi tanah dan kelayakan bangunan.",
   },
   {
     id: "pengaduan",
     name: "Pengaduan & Informasi Publik",
-    icon: "ChatText",
-    description: "Pengaduan dan akses informasi publik.",
+    icon: "ChatCircleText",
+    description: "Pengaduan pelayanan dan akses informasi publik.",
   },
 ];
+// Preserve specific context and aliases after category migration.
+export const serviceSubcategoryNames: Record<string, string> = {
+  kependudukan: "Kependudukan & Catatan Sipil",
+  pajak: "Perpajakan",
+  transportasi: "Kendaraan & Transportasi",
+  imigrasi: "Perjalanan & Keimigrasian",
+  "jaminan-sosial": "Kesehatan & Jaminan Sosial",
+  perizinan: "Usaha & Perizinan",
+  akademik: "Pendidikan & Dokumen Akademik",
+  ketenagakerjaan: "Pekerjaan & Ketenagakerjaan",
+  pertanahan: "Pertanahan & Bangunan",
+  hukum: "Hukum & Kepolisian",
+  daerah: "Administrasi Pemerintah Daerah",
+  pengaduan: "Pengaduan & Informasi Publik",
+};
 export const targetGroups = [
   ["pelajar", "Pelajar"],
   ["mahasiswa", "Mahasiswa"],

@@ -9,6 +9,14 @@ export const activityOptions = [
   ["usaha", "Memiliki usaha"],
   ["lainnya", "Lainnya"],
 ];
+export const educationOptions = [
+  ["sd", "SD/sederajat"],
+  ["smp", "SMP/sederajat"],
+  ["sma", "SMA/SMK/sederajat"],
+  ["diploma", "Diploma (D1–D4)"],
+  ["sarjana", "Sarjana (S1)"],
+  ["pascasarjana", "Pascasarjana (S2/S3)"],
+];
 export const profileRegions = dataset.regions;
 export function profileLocation(profile: Profile) {
   const province =
@@ -27,6 +35,9 @@ export function profileLocation(profile: Profile) {
 export function editableProfile(profile: Profile = {}) {
   return {
     ...profileLocation(profile),
+    education: ["magister", "doktor"].includes(profile.education || "")
+      ? "pascasarjana"
+      : profile.education || "",
     activities: [
       ...new Set(
         (profile.activities || []).filter((value) =>
@@ -47,8 +58,15 @@ export function editableProfile(profile: Profile = {}) {
   };
 }
 export function hasProfileInformation(profile: Profile) {
-  return Object.values(profile).some((value) =>
-    Array.isArray(value) ? value.length > 0 : Boolean(value?.trim()),
+  return Boolean(
+    profile.provinceCode ||
+      profile.province ||
+      profile.cityCode ||
+      profile.city ||
+      profile.education ||
+      profile.activities?.length ||
+      profile.interests?.length ||
+      profile.activitiesOther?.trim(),
   );
 }
 export function profileInitials(name: string, email = "") {

@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Eye, EyeSlash } from "@phosphor-icons/react";
+import { AdminLogin } from "./AdminLogin.jsx";
 import {
   authErrorMessage,
   authIntent,
@@ -27,7 +28,7 @@ export function AuthHeader() {
     </header>
   );
 }
-export function AuthLayout({ title, subtitle, children }) {
+export function AuthLayout({ title, subtitle, children, hidePrivacy = false }) {
   return (
     <section className="auth-layout" aria-labelledby="auth-title">
       <div className="auth-intro">
@@ -35,12 +36,12 @@ export function AuthLayout({ title, subtitle, children }) {
         <p>{subtitle}</p>
       </div>
       {children}
-      <p className="auth-privacy">
+      {!hidePrivacy && <p className="auth-privacy">
         Akunmu digunakan untuk menyimpan program dan layanan pilihan. Kamu bisa
         melengkapi profil nanti untuk mendapatkan rekomendasi yang lebih sesuai.
         <br />
         <a href="/privasi?utm_source=chatgpt.com">Kebijakan Privasi</a>
-      </p>
+      </p>}
     </section>
   );
 }
@@ -49,12 +50,15 @@ export function AuthPage({
   service = authService,
   onAuthenticated,
   onDemoAuthenticated,
+  navigate,
 }) {
   const registering = mode === "daftar",
     recovering = mode === "pemulihan";
   const [fields, setFields] = useState({ name: "", email: "", password: "" });
+  const [loginTab, setLoginTab] = useState(() => new URLSearchParams(location.search).get("tab") === "admin" ? "admin" : "user");
   const [errors, setErrors] = useState({}),
     [message, setMessage] = useState("");
+  const [recoveryComplete, setRecoveryComplete] = useState(false);
   const [loading, setLoading] = useState(false),
     [showPassword, setShowPassword] = useState(false);
   const busy = useRef(false),
@@ -64,12 +68,17 @@ export function AuthPage({
     ? service.capabilities.passwordReset
     : service.capabilities.emailPassword;
   const queryString = location.search;
+  useEffect(() => { setLoginTab(new URLSearchParams(queryString).get("tab") === "admin" ? "admin" : "user"); }, [queryString]);
   useEffect(() => {
     if (Object.values(errors).some(Boolean)) summary.current?.focus();
   }, [errors]);
   function change(name, value) {
     setFields((previous) => ({ ...previous, [name]: value }));
     setErrors((previous) => ({ ...previous, [name]: undefined }));
+    if (recovering) {
+      setRecoveryComplete(false);
+      setMessage("");
+    }
   }
   async function authenticate(google = false) {
     if (busy.current || (google ? !service.capabilities.google : !enabled))
@@ -113,12 +122,14 @@ export function AuthPage({
         );
       } else if (result.status === "recovery_demo_requested") {
         setMessage(
-          "Simulasi pemulihan selesai. Tidak ada email yang dikirim atau kata sandi yang diubah. Kamu bisa kembali ke halaman Masuk dan menggunakan kata sandi contoh.",
+          "Jika alamat email terdaftar, petunjuk untuk memulihkan akses akan dikirim ke alamat tersebut.",
         );
+        setRecoveryComplete(true);
       } else if (result.status === "recovery_requested") {
         setMessage(
           "Jika alamat email terdaftar, ikuti petunjuk pemulihan yang diberikan layanan autentikasi.",
         );
+        setRecoveryComplete(true);
       } else {
         setErrors({
           form: "Sesi belum dapat dikonfirmasi. Silakan coba beberapa saat lagi.",
@@ -142,8 +153,20 @@ export function AuthPage({
     : registering
       ? "Simpan program pilihanmu dan temukan rekomendasi yang lebih sesuai dengan kebutuhanmu."
       : "Lanjutkan aktivitasmu dengan masuk ke akun HAKKITA.";
+  const tabs = !registering && !recovering ? <div className="auth-role-tabs" role="group" aria-label="Jenis akses masuk">
+    {[["user", "Pengguna"], ["admin", "Admin"]].map(([value, label]) => <button key={value} type="button" aria-pressed={loginTab === value} onClick={() => {
+      setLoginTab(value);
+      const params = new URLSearchParams(location.search);
+      if (value === "admin") params.set("tab", "admin"); else { params.delete("tab"); params.delete("reason"); }
+      navigate?.(`/masuk${params.size ? `?${params}` : ""}`);
+    }}>{label}</button>)}
+  </div> : null;
+  if (!registering && !recovering && loginTab === "admin") return <AuthLayout title="Masuk sebagai Admin" subtitle="Masuk untuk memeriksa dan mengelola informasi HAKKITA." hidePrivacy>
+    {tabs}<AdminLogin navigate={navigate} />
+  </AuthLayout>;
   return (
     <AuthLayout title={title} subtitle={subtitle}>
+      {tabs}
       {new URLSearchParams(location.search).get("reason") ===
         "session_expired" && (
         <p role="status" className="auth-status">
@@ -322,13 +345,18 @@ export function AuthPage({
             ? "Memproses…"
             : recovering
               ? service.mode === "session_demo"
-                ? "Lanjutkan pemulihan"
+                ? "Kirim tautan pemulihan"
                 : "Kirim tautan pemulihan"
               : registering
                 ? "Buat akun"
                 : "Masuk"}
         </button>
       </form>
+      {recovering && recoveryComplete && (
+        <a className="auth-back-login" href={`/masuk${queryString}`}>
+          Kembali ke Masuk
+        </a>
+      )}
       {!recovering && (
         <p className="auth-switch">
           <>

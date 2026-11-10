@@ -11,15 +11,20 @@ export function readSessionDemo(
   storage?: Pick<Storage, "getItem">,
 ): SessionSnapshot {
   try {
-    return normalizeSession(
-      JSON.parse(
-        (storage || window.sessionStorage).getItem(SESSION_DEMO_KEY) || "null",
-      ),
-      true,
-    );
+    return readSessionDemoStrict(storage);
   } catch {
     return blankSession();
   }
+}
+export function readSessionDemoStrict(
+  storage?: Pick<Storage, "getItem">,
+): SessionSnapshot {
+  return normalizeSession(
+    JSON.parse(
+      (storage || window.sessionStorage).getItem(SESSION_DEMO_KEY) || "null",
+    ),
+    true,
+  );
 }
 export function writeSessionDemo(
   state: SessionSnapshot,

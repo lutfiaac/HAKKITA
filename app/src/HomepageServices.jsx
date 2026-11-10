@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowRight, CaretRight } from "@phosphor-icons/react";
 import { findItem } from "./data.js";
 import { Icon, detailUrl } from "./ui.jsx";

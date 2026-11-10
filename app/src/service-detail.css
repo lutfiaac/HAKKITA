@@ -1,0 +1,160 @@
+/* Shared centered layout for service and program detail pages. */
+.program-detail-page {
+  width: calc(100% - 40px);
+  max-width: 880px;
+  margin-inline: auto;
+}
+.program-detail-layout {
+  display: block;
+  max-width: 900px;
+  margin-inline: auto;
+  margin-top: 28px;
+}
+.program-detail-overview,
+.program-overview-metadata,
+.program-detail-content {
+  width: 100%;
+  min-width: 0;
+}
+.program-detail-page .breadcrumb > * { min-width: 0; overflow-wrap: anywhere; }
+.program-detail-page .program-detail-summary,
+.program-detail-page .program-overview-metadata dd,
+.program-detail-page .program-detail-content :is(p, li, a, span) {
+  overflow-wrap: anywhere;
+}
+.program-detail-overview { margin-bottom: 22px; }
+.service-detail-overview { border-bottom: 0; }
+.program-overview-metadata {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-bottom: 26px;
+  margin-bottom: 28px;
+}
+.program-detail-category { font-family: inherit; }
+.service-detail-overview .program-detail-identity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.service-detail-overview .program-detail-identity > div { min-width: 0; }
+.service-detail-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 68px;
+  width: 68px;
+  height: 68px;
+  border: 1px solid #dbe8f7;
+  border-radius: 12px;
+  background: #edf5ff;
+  color: #1769c2;
+}
+.program-detail-actions {
+  width: 100%;
+  margin: 4px 0 36px;
+}
+.service-detail-page .program-action-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 22px;
+  border: 1px solid #bccfe3;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(35, 59, 85, .075);
+  background: #f5f8fc;
+}
+.service-detail-page .detail-action-copy { min-width: 0; flex: 1 1 280px; }
+.service-detail-page .detail-action-copy h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.service-detail-page .detail-action-copy p {
+  margin: 0;
+  color: #617087;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.service-detail-page .detail-action-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1 1 300px;
+}
+.service-detail-page .detail-action-controls .button {
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+  max-width: 100%;
+  white-space: normal;
+}
+.service-detail-page .detail-action-controls .text-link {
+  margin: 0 4px;
+  font-size: 13px;
+}
+.service-variant-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.service-variant-control button {
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid #dbe5ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b304c;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.service-variant-control button.selected {
+  border-color: #1769c2;
+  background: #edf5ff;
+  color: #1769c2;
+  font-weight: 600;
+}
+.service-detail-page :is(a, button):focus-visible,
+.program-detail-page :is(a, button):focus-visible {
+  outline: 3px solid #1769c2;
+  outline-offset: 3px;
+}
+.service-detail-content .program-detail-notice p { margin: 0; }
+.service-detail-content .program-official-sources li { padding: 12px 0; }
+@media (max-width: 640px) {
+  .program-detail-page {
+    width: calc(100% - 32px);
+  }
+  .program-detail-layout { margin-top: 20px; }
+  .program-detail-overview { margin-bottom: 18px; }
+  .program-overview-metadata {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .program-detail-page .program-detail-overview h1 { font-size: 30px; }
+  .program-detail-page .program-detail-summary { font-size: 15px; }
+  .program-detail-page .program-detail-section h2 { font-size: 21px; }
+  .program-detail-page .program-detail-section {
+    padding-top: 22px;
+    margin-bottom: 28px;
+  }
+  .service-detail-icon { flex-basis: 54px; width: 54px; height: 54px; }
+  .service-detail-icon svg { width: 30px; height: 30px; }
+  .service-detail-page .program-action-panel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px;
+  }
+  .service-detail-page .detail-action-copy,
+  .service-detail-page .detail-action-controls { flex-basis: auto; }
+  .service-detail-page .detail-action-controls { align-items: stretch; flex-direction: column; }
+  .service-detail-page .detail-action-controls .button { width: 100%; white-space: normal; }
+  .service-detail-page .detail-action-controls .text-link { justify-content: center; }
+  .service-variant-control button { flex: 1 1 auto; }
+}

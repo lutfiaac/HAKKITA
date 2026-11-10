@@ -26,7 +26,7 @@ import {
   ChatText,
   ShieldCheck,
 } from "@phosphor-icons/react";
-import { categoryName, resultUrl } from "./data.js";
+import { categoryName, resultUrl, hasSavedItem } from "./data.js";
 import { faqItems } from "./faq.js";
 const icons = {
   GraduationCap,
@@ -90,7 +90,9 @@ export function Search({
       >
         {type === "program"
           ? "Cari nama program atau jenis bantuan"
-          : "Cari program atau layanan"}
+          : type === "layanan"
+            ? "Cari layanan publik"
+            : "Cari program atau layanan"}
       </label>
       <input
         id={hero ? "hero-query" : "catalog-query"}
@@ -98,9 +100,9 @@ export function Search({
         onChange={(e) => setQuery(e.target.value)}
         placeholder={
           type === "program"
-            ? "Cari nama program atau jenis bantuan..."
+            ? "Temukan program yang sesuai"
             : type === "layanan"
-              ? "Cari KTP, NPWP, SIM, paspor..."
+              ? "Mau mengurus apa hari ini?"
               : "Cari program, bantuan, atau layanan publik..."
         }
         maxLength={200}
@@ -119,8 +121,13 @@ export function Search({
           <X />
         </button>
       )}
-      <button className="button primary search-submit" type="submit">
-        {!compact && <MagnifyingGlass size={21} />} Cari
+      <button
+        className="button primary search-submit"
+        type="submit"
+        aria-label="Cari"
+      >
+        <MagnifyingGlass size={21} aria-hidden="true" />
+        <span className="search-submit-label">Cari</span>
       </button>
     </form>
   );
@@ -171,11 +178,15 @@ export function Empty({
   children,
   action,
   href,
+  className = "",
+  iconSize = 46,
+  headingLevel = 2,
 }) {
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
-    <div className="empty">
-      <Component size={46} weight="duotone" />
-      <h2>{title}</h2>
+    <div className={`empty ${className}`.trim()}>
+      <Component size={iconSize} weight="duotone" aria-hidden="true" />
+      <Heading>{title}</Heading>
       <div>{children}</div>
       {action && (
         <a className="button primary" href={href}>
@@ -195,12 +206,16 @@ export function Card({
   curated = false,
   summary,
   catalogCard = false,
+  ctaLabel,
+  serviceCatalog = false,
+  returnTo = "",
 }) {
-  const target = resultUrl(item, query),
+  const detail = resultUrl(item, query),
+    target = returnTo ? hrefWith(detail, { from: returnTo }) : detail,
     variant =
-      item.variants?.find((v) => target.endsWith(`/${v.id}`)) ||
+      item.variants?.find((v) => detail.endsWith(`/${v.id}`)) ||
       item.variants?.[0],
-    key = item.id + (variant ? `:${variant.id}` : "");
+    saved = hasSavedItem(plans, item, variant?.id || "");
   if (item.type === "program") {
     const photo =
       item.category === "pendidikan"
@@ -238,19 +253,24 @@ export function Card({
           {children}
           <div className="card-actions">
             <a className="card-link program-card-cta" href={target}>
-              {catalogCard ? "Lihat detail program" : "Lihat Program"}{" "}
+              {ctaLabel || (catalogCard ? "Lihat detail program" : "Lihat Program")}{" "}
               <ArrowRight size={18} />
             </a>
             {save && (
               <button
                 className="icon-button bookmark-action"
-                aria-label={`${plans[key] ? "Hapus simpanan" : "Simpan"} ${item.name}`}
-                aria-pressed={Boolean(plans[key])}
+                aria-label={
+                  saved
+                    ? `Hapus dari Rencanaku: ${item.name}`
+                    : `Simpan ${item.name} ke Rencanaku`
+                }
+                title={saved ? "Hapus dari Rencanaku" : "Simpan ke Rencanaku"}
+                aria-pressed={saved}
                 onClick={() => save(item, variant?.id || "")}
               >
                 <BookmarkSimple
                   size={23}
-                  weight={plans[key] ? "fill" : "regular"}
+                  weight={saved ? "fill" : "regular"}
                 />
               </button>
             )}
@@ -260,35 +280,54 @@ export function Card({
     );
   }
   return (
-    <article className="catalog-card">
-      <div className="card-meta">
-        <span>{categoryName(item.category)}</span>
-        <Icon name={item.icon} size={27} />
-      </div>
-      <span className="information-type">
-        {item.type === "program" ? "Program" : "Layanan"}
-      </span>
+    <article
+      className={`catalog-card${serviceCatalog ? " service-catalog-card" : ""}`}
+    >
+      {!serviceCatalog && (
+        <div className="card-meta">
+          <span>{categoryName(item.category)}</span>
+          <Icon name={item.icon} size={27} />
+        </div>
+      )}
+      {!serviceCatalog && (
+        <span className="information-type">
+          {item.type === "program" ? "Program" : "Layanan"}
+        </span>
+      )}
       <h2>
         <a href={target}>{item.name}</a>
       </h2>
-      {item.agency && <p className="agency">{item.agency}</p>}
-      <p>{item.summary}</p>
+      {!serviceCatalog && item.agency && (
+        <p className="agency">{item.agency}</p>
+      )}
+      <p className={serviceCatalog ? "service-card-summary" : undefined}>
+        {item.summary}
+      </p>
       {children}
       <div className="card-actions">
         <a className="text-link card-link" href={target}>
-          {item.type === "program" ? "Lihat Program" : "Lihat Panduan"}
+          {serviceCatalog
+            ? "Lihat panduan"
+            : item.type === "program"
+              ? "Lihat Program"
+              : "Lihat Panduan"}
           <ArrowRight size={19} />
         </a>
         {save && (
           <button
             className="icon-button bookmark-action"
-            aria-label={`${plans[key] ? "Hapus simpanan" : "Simpan"} ${item.name}`}
-            aria-pressed={Boolean(plans[key])}
-            onClick={() => save(item, variant?.id || "")}
+            aria-label={
+              saved
+                ? `Hapus dari Rencanaku: ${item.name}`
+                : `Simpan ${item.name} ke Rencanaku`
+            }
+            title={saved ? "Hapus dari Rencanaku" : "Simpan ke Rencanaku"}
+            aria-pressed={saved}
+            onClick={() => save(item, variant?.id || "", returnTo)}
           >
             <BookmarkSimple
               size={21}
-              weight={plans[key] ? "fill" : "regular"}
+              weight={saved ? "fill" : "regular"}
             />
           </button>
         )}
@@ -368,30 +407,35 @@ export function FAQ({ numbered = false, minimal = false, items = faqItems }) {
     </div>
   );
 }
-export function Modal({ title, children, onClose, id = "hakkita-dialog" }) {
+export function Modal({ title, children, onClose, id = "hakkita-dialog", className = "" }) {
   const ref = useRef(null);
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     const previous = document.activeElement;
     const element = ref.current;
     const focusable = () =>
       [
         ...element.querySelectorAll(
-          'button,a[href],input,select,textarea,[tabindex="0"]',
+          'button,a[href],input:not([type="hidden"]),select,textarea,summary,[tabindex="0"]',
         ),
-      ].filter((x) => !x.disabled);
+      ].filter((x) => !x.disabled && !x.closest('[hidden],[inert],[aria-hidden="true"]'));
     focusable()[0]?.focus();
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     function key(e) {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        close.current();
       }
       if (e.key === "Tab") {
         const list = focusable(),
           first = list[0],
           last = list.at(-1);
-        if (e.shiftKey && document.activeElement === first) {
+        if (!element.contains(document.activeElement) || document.activeElement === element) {
+          e.preventDefault();
+          (e.shiftKey ? last : first)?.focus();
+        } else if (e.shiftKey && document.activeElement === first) {
           e.preventDefault();
           last?.focus();
         } else if (!e.shiftKey && document.activeElement === last) {
@@ -406,7 +450,7 @@ export function Modal({ title, children, onClose, id = "hakkita-dialog" }) {
       document.body.style.overflow = overflow;
       if (previous?.isConnected) previous.focus();
     };
-  }, [onClose]);
+  }, []);
   return (
     <div
       className="modal-backdrop"
@@ -416,10 +460,11 @@ export function Modal({ title, children, onClose, id = "hakkita-dialog" }) {
     >
       <section
         ref={ref}
-        className="modal-panel"
+        className={`modal-panel ${className}`.trim()}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={`${id}-title`}
+        aria-labelledby={title ? `${id}-title` : undefined}
+        aria-label={title ? undefined : "Hasil pencarian program"}
       >
         <button
           className="icon-button modal-close"
@@ -428,7 +473,7 @@ export function Modal({ title, children, onClose, id = "hakkita-dialog" }) {
         >
           <X size={22} />
         </button>
-        <h2 id={`${id}-title`}>{title}</h2>
+        {title && <h2 id={`${id}-title`}>{title}</h2>}
         {children}
       </section>
     </div>
@@ -440,6 +485,7 @@ export function NotFound() {
       <Empty
         icon={Compass}
         title="Halaman ini belum ditemukan."
+        headingLevel={1}
         action="Kembali ke beranda"
         href="/"
       >

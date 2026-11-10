@@ -1,20 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
-  ArrowLeft,
   ShieldCheck,
   UserCircle,
-  SignOut,
-  Trash,
   Info,
 } from "@phosphor-icons/react";
 import { useAccount } from "./AccountContext";
-import {
-  persistentProfile,
-  safeReturnPath,
-  validateIdentity,
-} from "./account-store";
-import { programCategories, provinces } from "./taxonomy";
+import { safeReturnPath } from "./account-store";
 import { profileState, recommendPrograms } from "./recommendations";
 import { programs, findItem } from "./data.js";
 import {
@@ -23,11 +15,9 @@ import {
   Empty,
   Card,
   hrefWith,
-  Modal,
-  detailUrl,
 } from "./ui.jsx";
 
-export function DemoAccountPage({ mode, navigate }) {
+export function DemoAccountPage({ mode }) {
   const { state, register, login } = useAccount();
   const [displayName, setName] = useState(""),
     [email, setEmail] = useState(""),

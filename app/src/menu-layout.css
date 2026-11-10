@@ -1,0 +1,127 @@
+/* Shared page frame and reading typography for the three primary information menus. */
+.container.page:is(.discovery-page, .program-catalog, .service-catalog, .budget-page, .program-detail-page) {
+  width: calc(100% - 112px);
+  max-width: 1440px;
+  margin-inline: auto;
+}
+@media(max-width:1150px) {
+  .container.page:is(.discovery-page, .program-catalog, .service-catalog, .budget-page, .program-detail-page) {
+    width:calc(100% - 64px);
+  }
+}
+
+.discovery-page .page-intro h1,
+.program-catalog .page-intro h1,
+.service-catalog .page-intro h1,
+.budget-page .page-intro h1,
+.program-detail-page .program-detail-overview h1 {
+  font-size: 32px;
+  line-height: 1.25;
+}
+
+/* Keep the three main menu headlines and their first content gap consistent. */
+.program-catalog .page-intro,
+.service-catalog .page-intro,
+.budget-page > .page-intro {
+  padding:26px 0;
+}
+.service-catalog .page-intro { margin-bottom:0; }
+.service-catalog .service-hero { margin-top:0; }
+.budget-page .budget-tabs { margin-top:0; }
+
+/* Give every program card one consistent whole-card hover and keyboard-focus response. */
+.catalog-card.program-card {
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.catalog-card.program-card:hover,
+.catalog-card.program-card:focus-within {
+  transform:translateY(-3px);
+  border-color:#a9c4e2;
+  box-shadow:0 8px 20px rgba(35,59,85,.12);
+}
+@media(prefers-reduced-motion:reduce) {
+  .catalog-card.program-card { transition:none; }
+  .catalog-card.program-card:hover,
+  .catalog-card.program-card:focus-within { transform:none; }
+}
+
+.discovery-page .page-intro > p:not(.eyebrow),
+.service-catalog .page-intro > p:not(.eyebrow),
+.budget-page .page-intro > p:not(.eyebrow),
+.program-detail-page .program-detail-summary {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.program-detail-page .program-detail-section h2,
+.service-catalog .service-results-heading h2,
+.budget-page .budget-section > h2,
+.discovery-page > .page-intro + .small-callout + .catalog-layout h2 {
+  font-size: 24px;
+  line-height: 1.35;
+}
+.service-catalog .service-results-heading h2 {
+  font-size:18px;
+  font-weight:600;
+  line-height:1.4;
+}
+
+.program-detail-page .program-detail-content :is(p, li),
+.budget-page .budget-section > p,
+.service-catalog .service-card-summary,
+.discovery-page .catalog-card > p {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.catalog-program-card .program-card-summary,
+.service-catalog .service-catalog-card .service-card-summary {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .container.page:is(.discovery-page, .program-catalog, .service-catalog, .budget-page, .program-detail-page) {
+    width: calc(100% - 40px);
+  }
+
+  .discovery-page .page-intro h1,
+  .program-catalog .page-intro h1,
+  .service-catalog .page-intro h1,
+  .budget-page .page-intro h1 {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+
+  .program-detail-page .program-detail-overview h1 {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+
+  .program-catalog .page-intro,
+  .service-catalog .page-intro,
+  .budget-page > .page-intro {
+    padding:17px 0 27px;
+  }
+  .service-catalog .service-hero { margin-top:0; }
+  .budget-page .budget-tabs { margin-top:0; }
+
+  .discovery-page .page-intro > p:not(.eyebrow),
+  .service-catalog .page-intro > p:not(.eyebrow),
+  .budget-page .page-intro > p:not(.eyebrow),
+  .program-detail-page .program-detail-summary {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .program-detail-page .program-detail-section h2,
+  .service-catalog .service-results-heading h2,
+  .budget-page .budget-section > h2 {
+    font-size: 21px;
+    line-height: 1.4;
+  }
+  .service-catalog .service-results-heading h2 {
+    font-size:18px;
+    font-weight:600;
+  }
+}

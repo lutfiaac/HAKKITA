@@ -781,10 +781,7 @@ test("session-demo auth pages use focused layout, enabled demo controls and pres
     );
     for (const input of document.querySelectorAll(".auth-form input"))
       assert.equal(input.disabled, false);
-    assert.equal(
-      document.querySelector(".auth-submit").disabled,
-      false,
-    );
+    assert.equal(document.querySelector(".auth-submit").disabled, false);
     assert.doesNotMatch(text(), /Mode demo\. Data tersimpan/);
     assert.equal(
       document.querySelector(".auth-guest").getAttribute("href"),
@@ -854,14 +851,23 @@ test("password recovery accepts a valid email without sending mail or creating a
   const submit = button("Lanjutkan pemulihan");
   assert.equal(submit.disabled, false);
   await click(submit);
-  assert.match(document.querySelector('[role="alert"]').textContent, /Masukkan alamat email/);
+  assert.match(
+    document.querySelector('[role="alert"]').textContent,
+    /Masukkan alamat email/,
+  );
   await input(email, "invalid");
   await click(submit);
-  assert.match(document.querySelector('[role="alert"]').textContent, /format alamat email/);
+  assert.match(
+    document.querySelector('[role="alert"]').textContent,
+    /format alamat email/,
+  );
   const previous = window.sessionStorage.getItem(SESSION_DEMO_KEY);
   await input(email, "person@example.com");
   await click(submit);
-  assert.match(document.querySelector('[role="status"]').textContent, /Tidak ada email yang dikirim atau kata sandi yang diubah/);
+  assert.match(
+    document.querySelector('[role="status"]').textContent,
+    /Tidak ada email yang dikirim atau kata sandi yang diubah/,
+  );
   assert.equal(window.sessionStorage.getItem(SESSION_DEMO_KEY), previous);
   assert.equal(document.querySelector(".auth-switch"), null);
   assert.equal(document.querySelector(".site-footer"), null);
@@ -1551,17 +1557,19 @@ test("homepage service cards open their guides and category CTA scrolls and focu
     await click(anchor("Lihat kategori layanan"));
     assert.equal(location.pathname, "/layanan");
     assert.equal(location.hash, "#kategori-layanan");
-    assert.equal(document.querySelectorAll("#kategori-layanan a").length, 12);
+    assert.equal(
+      document.querySelectorAll("#kategori-layanan button").length,
+      8,
+    );
     assert.equal(document.activeElement.id, "kategori-layanan");
     assert.deepEqual(scrolls, ["kategori-layanan"]);
-    await click(
-      document.querySelector(
-        '#kategori-layanan a[href="/layanan/kategori/pajak"]',
-      ),
+    await click(button("Perpajakan"));
+    assert.equal(
+      new URLSearchParams(location.search).get("kategori"),
+      "pajak",
     );
-    assert.equal(document.querySelector("#category-filter").value, "pajak");
-    await click(button("Reset Semua"));
-    assert.equal(document.querySelectorAll(".catalog-card").length, 8);
+    await click(button("Perpajakan"));
+    assert.equal(document.querySelectorAll(".catalog-card").length, 12);
     await visit("/");
     assert.equal(anchor("Lihat semua layanan"), undefined);
     await visit("/layanan");
@@ -1570,7 +1578,7 @@ test("homepage service cards open their guides and category CTA scrolls and focu
     assert.equal(document.activeElement.id, "main-content");
     await visit("/layanan#kategori-layanan");
     assert.equal(document.activeElement.id, "kategori-layanan");
-    assert.equal(scrolls.length, 2);
+    assert.equal(scrolls.filter((id) => id === "kategori-layanan").length, 2);
   } finally {
     if (original) window.HTMLElement.prototype.scrollIntoView = original;
     else delete window.HTMLElement.prototype.scrollIntoView;
@@ -1580,8 +1588,8 @@ test("homepage service cards open their guides and category CTA scrolls and focu
 test("service categories and synonyms lead to correct records and direct variants", async () => {
   await mount("/layanan");
   assert.equal(
-    document.querySelectorAll(".service-category-list a").length,
-    12,
+    document.querySelectorAll(".service-categories button").length,
+    8,
   );
   await visit("/cari?q=bikin%20NPWP");
   assert.equal(document.querySelectorAll(".catalog-card").length, 1);
@@ -1593,7 +1601,7 @@ test("service categories and synonyms lead to correct records and direct variant
   await visit("/program/kategori/kesehatan");
   assert.match(text(), /Tidak ada program yang sesuai/);
   await visit("/layanan/kategori/pajak");
-  assert.equal(document.querySelectorAll(".catalog-card").length, 1);
+  assert.equal(document.querySelectorAll(".catalog-card").length, 4);
 });
 test("global search supports clear, query submission and safe text rendering", async () => {
   await mount("/cari?q=KIP");
@@ -1606,10 +1614,91 @@ test("global search supports clear, query submission and safe text rendering", a
         new window.Event("submit", { bubbles: true, cancelable: true }),
       ),
   );
-  assert.equal(document.querySelectorAll(".catalog-card").length, 16);
+  assert.equal(document.querySelectorAll(".catalog-card").length, catalog.length);
   await visit("/cari?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E");
   assert.equal(document.querySelectorAll("script").length, 0);
   assert.match(text(), /Belum ada hasil yang sesuai/);
+});
+
+test("service catalog toggles categories and combines search without redundant controls", async () => {
+  await mount("/layanan");
+  assert.equal(document.querySelectorAll(".service-categories button").length, 8);
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 12);
+  assert.equal(document.querySelector(".service-shortcuts"), null);
+  assert.equal(document.querySelector(".service-catalog select"), null);
+  assert.equal(document.querySelector(".service-catalog .card-meta"), null);
+  assert.equal(document.querySelector(".service-catalog .agency"), null);
+  await click(button("Kependudukan & Dokumen Pribadi"));
+  assert.equal(button("Kependudukan & Dokumen Pribadi").getAttribute("aria-pressed"), "true");
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 8);
+  assert.equal(document.activeElement.id, "service-results-title");
+  await input(document.querySelector("#catalog-query"), "  Kartu   Tanda Penduduk ");
+  await act(async () => document.querySelector(".search-form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })));
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 1);
+  assert.match(document.querySelector("#service-results-title").textContent, /Hasil pencarian/);
+  await click(document.querySelector('[aria-label="Hapus pencarian"]'));
+  assert.equal(new URLSearchParams(location.search).get("kategori"), "kependudukan");
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 8);
+  await click(button("Kependudukan & Dokumen Pribadi"));
+  assert.equal(button("Kependudukan & Dokumen Pribadi").getAttribute("aria-pressed"), "false");
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 12);
+  await click(button("Berikutnya"));
+  assert.equal(new URLSearchParams(location.search).get("halaman"), "2");
+  await click(button("Perpajakan"));
+  assert.equal(new URLSearchParams(location.search).get("halaman"), null);
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 4);
+});
+
+test("service catalog handles empty combinations and invalid URLs without broken routes", async () => {
+  await mount("/layanan?kategori=tidak-ada&wilayah=Atlantis&kanal=website");
+  assert.match(text(), /Kategori pada tautan ini sudah tidak tersedia/);
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 12);
+  await visit("/layanan/kategori/imigrasi");
+  assert.equal(button("Kependudukan & Dokumen Pribadi").getAttribute("aria-pressed"), "true");
+  assert.ok([...document.querySelectorAll(".service-catalog-card h2")].some(el => el.textContent.includes("Paspor")));
+  await visit("/layanan?q=zzzzz&kategori=pajak");
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 0);
+  await click(button("Hapus pencarian"));
+  assert.equal(new URLSearchParams(location.search).get("kategori"), "pajak");
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 4);
+});
+
+test("service guide variants and breadcrumb return preserve catalog context", async () => {
+  await mount("/layanan?kategori=kependudukan&q=KTP%20hilang");
+  await click(document.querySelector(".service-catalog-card .card-link"));
+  assert.equal(location.pathname, "/layanan/ktp-el/hilang");
+  await click(button("Rusak"));
+  await click(document.querySelector('.breadcrumb a[href^="/layanan?"]'));
+  assert.equal(location.pathname, "/layanan");
+  assert.equal(new URLSearchParams(location.search).get("q"), "KTP hilang");
+  assert.equal(button("Kependudukan & Dokumen Pribadi").getAttribute("aria-pressed"), "true");
+  assert.equal(document.querySelectorAll(".service-catalog-card").length, 1);
+});
+
+test("service bookmarks resume filtered catalog after sign-in and do not duplicate entries", async () => {
+  await mount("/layanan?kategori=pajak&q=bikin%20npwp");
+  await click(document.querySelector(".bookmark-action"));
+  const login = document.querySelector('.modal-panel a[href^="/masuk"]');
+  const params = new URL(login.href).searchParams;
+  assert.equal(params.get("next"), "/layanan?q=bikin+npwp&kategori=pajak");
+  assert.equal(params.get("save"), "npwp");
+  await click(login);
+  await click(button("Lanjutkan dengan Google"));
+  assert.equal(location.pathname, "/layanan");
+  assert.equal(
+    document.querySelector(".bookmark-action").getAttribute("aria-pressed"),
+    "true",
+  );
+  const state = () =>
+    JSON.parse(window.sessionStorage.getItem(SESSION_DEMO_KEY));
+  assert.equal(Object.keys(state().accounts[state().activeId].plans).length, 1);
+  await click(document.querySelector(".bookmark-action"));
+  assert.equal(
+    document.querySelector(".bookmark-action").getAttribute("aria-pressed"),
+    "false",
+  );
+  await click(document.querySelector(".bookmark-action"));
+  assert.equal(Object.keys(state().accounts[state().activeId].plans).length, 1);
 });
 test("profile stores region codes, recalculates recommendations and removes additional questions", async () => {
   await mount("/profil/edit", seed());

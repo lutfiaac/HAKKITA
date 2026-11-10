@@ -13,7 +13,7 @@
 }
 .nav-links {
   gap: 20px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .nav-inner {
   gap: 24px;
@@ -486,6 +486,9 @@
   box-shadow: 0 15px 50px #172b3a22;
   max-height: calc(100dvh - 48px);
   overflow: auto;
+  min-width: 0;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
 }
 .modal-panel > h2 {
   font-size: 25px;
@@ -1052,7 +1055,7 @@
     gap: 6px;
   }
   .active-filters button {
-    font-size: 9px;
+    font-size: 12px;
     padding: 6px 8px;
   }
   .catalog-grid,
@@ -1249,6 +1252,9 @@
     right: 0;
     height: auto;
     padding: 18px 32px 27px;
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: #fff;
     border-top: 1px solid var(--line);
     box-shadow: 0 9px 15px #142b3f12;
@@ -1259,6 +1265,7 @@
     align-items: stretch;
     gap: 0;
     font-size: 14px;
+    overflow: hidden;
   }
   .header-main-nav > a {
     padding: 13px 0;
@@ -1281,7 +1288,110 @@
   }
 }
 @media (max-width: 640px) {
+  .has-open-mobile-nav .assistant-launcher {
+    display: none;
+  }
   .site-header .nav-links {
-    padding: 15px 20px 23px;
+    padding: 12px 20px 18px;
+    border-radius: 0 0 16px 16px;
+  }
+  .site-header .nav-links.open > .header-main-nav {
+    display: grid;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .site-header .header-main-nav > a {
+    min-height: 48px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    color: #344256;
+    font-size: 15px;
+    line-height: 1.4;
+    transition: background-color .16s ease, color .16s ease;
+  }
+  .site-header .header-main-nav > a:hover {
+    background: #f5f8fc;
+  }
+  .site-header .header-main-nav > a.active {
+    color: #1769c2;
+    background: #edf5ff;
+    font-weight: 600;
+  }
+  .site-header .nav-links.open > .header-account-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    flex: 0 0 auto;
+  }
+  .site-header .header-account-actions > .mobile-plan-hidden {
+    display: none;
+  }
+  .site-header .nav-links .plan-nav,
+  .site-header .nav-links .account-nav {
+    width: 100%;
+    min-height: 46px;
+    height: 46px;
+    margin: 0;
+    padding: 0 12px;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+  .site-header .nav-links .plan-nav {
+    border-color: #c7d6e8;
+    background: #fff;
+  }
+  .site-header .nav-links .plan-nav:hover {
+    background: #f5f8fc;
+    border-color: #9db7d5;
+  }
+  .site-header .nav-links .account-nav {
+    font-weight: 600;
+  }
+  .site-header .header-account-actions .account-menu {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin: 0;
+  }
+  .site-header .header-account-actions .account-menu > summary {
+    display: none;
+  }
+  .site-header .header-account-actions .account-menu > div {
+    position: static;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .site-header .header-account-actions .account-dropdown-identity {
+    display: none;
+  }
+  .site-header .header-account-actions .account-dropdown-nav {
+    margin: 0;
+    padding: 6px 0;
+  }
+  .site-header .header-account-actions .account-dropdown-nav a,
+  .site-header .header-account-actions .account-dropdown-logout {
+    min-height: 46px;
+    padding: 11px 12px;
+    font-size: 15px;
+  }
+  .site-header .header-account-actions .account-dropdown-logout {
+    margin-top: 4px;
   }
 }

@@ -10,6 +10,15 @@ export type ProgramCategoryId =
   | "rentan";
 export type ServiceCategoryId =
   | "kependudukan"
+  | "transportasi"
+  | "jaminan-sosial"
+  | "pekerjaan-usaha"
+  | "pajak"
+  | "akademik"
+  | "pertanahan"
+  | "pengaduan";
+export type LegacyServiceCategoryId =
+  | "kependudukan"
   | "pajak"
   | "transportasi"
   | "imigrasi"
@@ -98,11 +107,12 @@ export interface ProgramTimeline {
 }
 export interface ServiceMetadata {
   primaryCategory: ServiceCategoryId;
+  serviceSubcategory: LegacyServiceCategoryId;
   aliases: string[];
   serviceChannels: ("online" | "offline")[];
   applicantType: "wni" | "perseorangan" | "umum";
   governmentLevel: "pusat" | "daerah";
-  regionCoverage: RegionCoverage;
+  regionCoverage: RegionCoverage | null;
   locations: { name: string; url: string }[];
 }
 export interface SavedPlan {
@@ -110,6 +120,14 @@ export interface SavedPlan {
   variant: string;
   savedAt?: number;
   goal?: string;
+  itemType?: "program" | "layanan";
+  checklist?: Record<string, boolean>;
+  reminder?: {
+    enabled: boolean;
+    schedule: boolean;
+    updates: boolean;
+    updatedAt?: number;
+  };
 }
 export interface LocalIdentity {
   id: string;

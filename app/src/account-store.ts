@@ -1,6 +1,5 @@
 import type {
   AccountAdapter,
-  AccountRecord,
   Profile,
   SavedPlan,
   SessionSnapshot,
@@ -10,6 +9,11 @@ export const blankSession = (): SessionSnapshot => ({
   activeId: null,
   accounts: {},
 });
+export function readLocalSession(
+  storage: Pick<Storage, "getItem"> = localStorage,
+) {
+  return normalizeSession(JSON.parse(storage.getItem(ACCOUNT_KEY) || "null"));
+}
 const profileKeys = [
   "provinceCode",
   "cityCode",
@@ -38,7 +42,7 @@ export function normalizePlans(value: unknown): Record<string, SavedPlan> {
   return Object.fromEntries(
     Object.entries(value).flatMap(([key, plan]) => {
       if (
-        !/^[a-z0-9-]+(?::[a-z0-9-]+)?$/.test(key) ||
+        !/^(?:(?:program|layanan):)?[a-z0-9-]+(?::[a-z0-9-]+)?$/.test(key) ||
         !plan ||
         typeof plan !== "object" ||
         !Array.isArray(plan.done)
@@ -47,15 +51,49 @@ export function normalizePlans(value: unknown): Record<string, SavedPlan> {
       return [
         [
           key,
-          {
-            done: plan.done.filter(
-              (x: unknown) =>
-                Number.isInteger(x) && Number(x) >= 0 && Number(x) < 100,
-            ),
-            variant: typeof plan.variant === "string" ? plan.variant : "",
-            savedAt: typeof plan.savedAt === "number" ? plan.savedAt : 0,
-            goal: typeof plan.goal === "string" ? plan.goal.slice(0, 80) : "",
-          },
+          (() => {
+            const checklist =
+              plan.checklist && typeof plan.checklist === "object"
+                ? Object.fromEntries(
+                    Object.entries(plan.checklist)
+                      .flatMap(([id, checked]) =>
+                        /^[a-zA-Z0-9][a-zA-Z0-9:_-]{0,100}$/.test(id) &&
+                        typeof checked === "boolean" ? [[id, checked] as const] : [],
+                      )
+                      .slice(0, 100),
+                  )
+                : undefined;
+            const rawReminder =
+              plan.reminder && typeof plan.reminder === "object"
+                ? plan.reminder
+                : undefined;
+            return {
+              done: plan.done.filter(
+                (x: unknown) =>
+                  Number.isInteger(x) && Number(x) >= 0 && Number(x) < 100,
+              ),
+              variant: typeof plan.variant === "string" ? plan.variant : "",
+              savedAt: typeof plan.savedAt === "number" ? plan.savedAt : 0,
+              goal: typeof plan.goal === "string" ? plan.goal.slice(0, 80) : "",
+              itemType:
+                plan.itemType === "program" || plan.itemType === "layanan"
+                  ? plan.itemType
+                  : undefined,
+              ...(checklist ? { checklist } : {}),
+              ...(rawReminder
+                ? {
+                    reminder: {
+                      enabled: rawReminder.enabled === true,
+                      schedule: rawReminder.schedule === true,
+                      updates: rawReminder.updates === true,
+                      ...(typeof rawReminder.updatedAt === "number"
+                        ? { updatedAt: rawReminder.updatedAt }
+                        : {}),
+                    },
+                  }
+                : {}),
+            };
+          })(),
         ],
       ];
     }),
@@ -103,9 +141,7 @@ export function createLocalAccountAdapter(
   return {
     read() {
       try {
-        return normalizeSession(
-          JSON.parse(storage.getItem(ACCOUNT_KEY) || "null"),
-        );
+        return readLocalSession(storage);
       } catch {
         return blankSession();
       }

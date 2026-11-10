@@ -225,14 +225,14 @@ test("catalog uses unique routes, sourced content, supported categories, and val
 });
 test("search tolerates case, whitespace, multiple terms and Indonesian categories", () => {
   assert.equal(filterCatalog({ query: "  KIP   KULIAH " })[0].id, "kip-kuliah");
-  assert.equal(filterCatalog({ query: "BPJS" }).length, 1);
+  assert.equal(filterCatalog({ query: "BPJS" }).length, 4);
   assert.equal(filterCatalog({ query: "kesehatan" })[0].id, "mobile-jkn");
   assert.equal(filterCatalog({ query: "zzzz-nonexistent" }).length, 0);
   assert.equal(filterCatalog({ query: "   " }).length, catalog.length);
 });
 test("combined catalog filters do not broaden regional guidance", () => {
   assert.equal(filterCatalog({ type: "program" }).length, 8);
-  assert.equal(filterCatalog({ type: "layanan" }).length, 8);
+  assert.equal(filterCatalog({ type: "layanan" }).length, 30);
   assert.equal(
     filterCatalog({ category: "pendidikan", type: "layanan" }).length,
     0,

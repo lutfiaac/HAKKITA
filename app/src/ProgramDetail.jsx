@@ -2,7 +2,6 @@ import React from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  BookmarkSimple,
   Check,
   Info,
   Signpost,
@@ -15,6 +14,7 @@ import {
 import { Breadcrumb, External, detailUrl } from "./ui.jsx";
 import { categoryName, findItem } from "./data.js";
 import { categoryImages } from "./category-images.js";
+import { DetailActionPanel } from "./DetailActionPanel.jsx";
 import {
   formatBenefitAmount,
   informationLabels,
@@ -302,49 +302,13 @@ function ProgramSources({ sources, agency }) {
     </section>
   );
 }
-function ProgramActions({ model, item, saved, save }) {
-  return (
-    <aside className="program-detail-actions" aria-label="Tindakan program">
-      <div className="program-action-panel">
-        <h2>{model.action.heading}</h2>
-        <p>{model.action.description}</p>
-        {model.action.url ? (
-          <External className="button primary" href={model.action.url}>
-            {model.action.label}
-          </External>
-        ) : (
-          <p className="program-data-note">
-            Kanal tindakan belum dapat dipastikan. Periksa sumber atau
-            konfirmasikan kepada penyelenggara.
-          </p>
-        )}
-        <button
-          className="button secondary"
-          aria-pressed={saved}
-          onClick={() => save(item)}
-        >
-          <BookmarkSimple size={19} weight={saved ? "fill" : "regular"} />
-          {saved ? "Hapus dari Rencanaku" : "Simpan ke Rencanaku"}
-        </button>
-        {saved && (
-          <a className="text-link" href="/rencanaku">
-            Buka Rencanaku <ArrowRight size={16} />
-          </a>
-        )}
-        <p className="program-action-note">
-          HAKKITA menyediakan informasi, bukan tempat pengajuan. Penetapan
-          penerima dilakukan penyelenggara.
-        </p>
-      </div>
-    </aside>
-  );
-}
 export function ProgramDetail({
   item,
   requirementsView = false,
   save,
   saved,
-  evaluation,
+  reminderActive,
+  onReminder,
 }) {
   const model = normalizeProgramDetail(item);
   const sections = requirementsView
@@ -412,7 +376,6 @@ export function ProgramDetail({
             );
           })}
         </dl>
-        <ProgramActions model={model} item={item} saved={saved} save={save} />
         <article className="program-detail-content">
           {model.notices.map((notice, index) => (
             <div
@@ -428,6 +391,9 @@ export function ProgramDetail({
           ))}
           {sections.map((section) => (
             <React.Fragment key={section.id}>
+              {!requirementsView && section.id === "cara-akses" && (
+                <ProgramPeriods registration={model.registration} />
+              )}
               <ProgramSection section={section} />
               {section.id === "persyaratan" && !requirementsView && (
                 <a
@@ -437,32 +403,34 @@ export function ProgramDetail({
                   Periksa persyaratan secara rinci <ArrowRight size={16} />
                 </a>
               )}
+              {section.id === "cara-akses" && !requirementsView && (
+                <DetailActionPanel
+                  heading="Akses program resmi"
+                  description="Periksa informasi terbaru dan lanjutkan melalui kanal resmi penyelenggara program."
+                  url={model.action.url}
+                  label={model.action.label || "Lihat informasi resmi"}
+                  saved={saved}
+                  onSave={() => save(item)}
+                  reminderActive={reminderActive}
+                  onReminder={onReminder}
+                />
+              )}
             </React.Fragment>
           ))}
-          {!requirementsView && (
-            <ProgramPeriods registration={model.registration} />
-          )}
-          {evaluation && (
-            <section className="program-detail-section personal-rule-check">
-              <h2>Berdasarkan informasi profilmu</h2>
-              <p>{evaluation.status}</p>
-              <ul>
-                {evaluation.rules.map((rule) => (
-                  <li key={rule.id}>
-                    <strong>
-                      {rule.state === "met"
-                        ? "Sesuai jawaban: "
-                        : rule.state === "not-met"
-                          ? "Belum sesuai: "
-                          : "Perlu diperiksa: "}
-                    </strong>
-                    {rule.label}
-                  </li>
-                ))}
-              </ul>
-              <p>Hasil ini bukan penetapan kelayakan atau penerimaan.</p>
-              <a href="/profil/edit">Perbarui informasi profil</a>
-            </section>
+          {!requirementsView && !sections.some((section) => section.id === "cara-akses") && (
+            <>
+              <ProgramPeriods registration={model.registration} />
+              <DetailActionPanel
+                heading="Akses program resmi"
+                description="Periksa informasi terbaru dan lanjutkan melalui kanal resmi penyelenggara program."
+                url={model.action.url}
+                label={model.action.label || "Lihat informasi resmi"}
+                saved={saved}
+                onSave={() => save(item)}
+                reminderActive={reminderActive}
+                onReminder={onReminder}
+              />
+            </>
           )}
           <ProgramSources sources={model.sources} agency={item.agency} />
           {guides.length > 0 && (

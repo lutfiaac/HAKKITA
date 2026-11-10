@@ -203,6 +203,27 @@
   border: 1px solid #e1e7ee;
   border-radius: 10px;
 }
+.auth-back-login {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:48px;
+  margin-top:14px;
+  border:1px solid #d7e0ea;
+  border-radius:10px;
+  background:#fff;
+  color:#1769c2;
+  font-size:14px;
+  font-weight:600;
+  transition:background-color .16s ease,border-color .16s ease;
+}
+.auth-back-login:hover,
+.auth-back-login:focus-visible {
+  border-color:#a9c6e7;
+  background:#f2f7fd;
+  text-decoration:none;
+}
 .account-menu .demo-session-indicator {
   font-size: 11px;
   color: #687385;
@@ -210,6 +231,7 @@
   margin-top: -6px;
 }
 @media (max-width: 640px) {
+  .auth-field input { font-size: 16px; }
   .auth-header-inner {
     min-height: 68px;
     gap: 16px;

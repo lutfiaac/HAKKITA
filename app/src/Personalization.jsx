@@ -1,4 +1,3 @@
-import React from "react";
 import { useAccount } from "./AccountContext";
 import { profileState } from "./recommendations";
 

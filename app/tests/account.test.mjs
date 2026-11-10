@@ -23,9 +23,9 @@ import {
 } from "../src/data.js";
 import { selectBudget, formatBudget } from "../src/budget.js";
 
-test("taxonomy has exactly seven program and twelve service categories, with no invented entries", () => {
+test("taxonomy has exactly seven program and eight service categories, with no invented entries", () => {
   assert.equal(programCategories.length, 7);
-  assert.equal(serviceCategories.length, 12);
+  assert.equal(serviceCategories.length, 8);
   assert.equal(
     programCategories.find((c) => c.id === "pekerjaan").name,
     "Pekerjaan & Karier",

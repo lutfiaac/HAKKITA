@@ -1,0 +1,668 @@
+.program-finder-promo {
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+
+.homepage > .home-section.program-exploration {
+  padding-bottom: 24px;
+}
+
+.homepage > .home-section.program-finder-promo {
+  padding-top: 36px;
+  padding-bottom: 24px;
+}
+
+.homepage > .home-section.featured-programs {
+  padding-top: 32px;
+}
+
+.program-finder-promo-panel {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 26px 28px;
+  border: 1px solid #cbdcf0;
+  border-radius: 16px;
+  background: linear-gradient(105deg, #f2f7ff 0%, #f9fbff 58%, #fffaf2 100%);
+}
+
+.program-finder-promo-icon {
+  display: grid;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  place-items: center;
+  border-radius: 13px;
+  background: #edf5ff;
+  color: #1769c2;
+}
+
+.program-finder-promo-icon img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.program-finder-promo-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.program-finder-promo-copy h2 {
+  margin: 0;
+  color: #253044;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.program-finder-promo-copy p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.program-finder-page {
+  padding-bottom: 64px;
+}
+
+.program-finder-page.is-modal {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.program-finder-dialog {
+  width: min(780px, 100%);
+  padding: 30px 32px 24px;
+}
+
+.program-finder-dialog.has-results {
+  padding-top: 16px;
+}
+
+.program-finder-dialog.has-results .program-finder-results {
+  margin-top: 4px;
+}
+.program-finder-dialog.has-results .program-finder-results-header { padding-right: 40px; }
+
+.program-finder-modal-intro {
+  margin: -8px 0 0;
+  padding-right: 28px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.program-finder-heading,
+.program-finder-wizard,
+.program-finder-profile-choice,
+.program-finder-results {
+  width: min(100%, 744px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.program-finder-heading {
+  margin-top: 26px;
+}
+
+.program-finder-back-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #1769c2;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.program-finder-back-home:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.program-finder-heading h1 {
+  margin: 18px 0 0;
+  color: #253044;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.program-finder-heading > p {
+  margin: 9px 0 0;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.program-finder-wizard,
+.program-finder-profile-choice,
+.program-finder-results {
+  margin-top: 30px;
+}
+
+.program-finder-progress-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.program-finder-progress {
+  height: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: #e7ecf2;
+}
+
+.program-finder-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1769c2;
+  transition: width 180ms ease;
+}
+
+.program-finder-question {
+  margin: 26px 0 20px;
+}
+
+.program-finder-step-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #1769c2;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.program-finder-question h2,
+.program-finder-profile-choice h2,
+.program-finder-results-header h2 {
+  margin: 8px 0 0;
+  color: #253044;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.program-finder-question > p,
+.program-finder-profile-choice > p,
+.program-finder-results-header > div > p {
+  margin: 7px 0 0;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.program-finder-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.program-finder-option {
+  position: relative;
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  border: 1px solid #e1e9f2;
+  border-radius: 10px;
+  background: #fff;
+  color: #253044;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.program-finder-option:hover {
+  border-color: #a9c9ef;
+}
+
+.program-finder-option:has(input:checked) {
+  border-color: #1769c2;
+  background: #edf5ff;
+}
+
+.program-finder-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.program-finder-option-indicator {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  border: 1.5px solid #94a3b8;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.program-finder-option input[type="radio"] + .program-finder-option-indicator {
+  border-radius: 50%;
+}
+
+.program-finder-option input:checked + .program-finder-option-indicator {
+  border-color: #1769c2;
+  background: #1769c2;
+}
+
+.program-finder-option input[type="checkbox"]:checked + .program-finder-option-indicator::after {
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.program-finder-option input[type="radio"]:checked + .program-finder-option-indicator {
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+.program-finder-option input:focus-visible + .program-finder-option-indicator {
+  outline: 3px solid #8dbcf0;
+  outline-offset: 2px;
+}
+
+.program-finder-region-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.program-finder-region-fields .profile-field {
+  min-width: 0;
+}
+
+.program-finder-region-fields .profile-field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 46px 11px 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364758B' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 20px;
+}
+
+.program-finder-navigation,
+.program-finder-navigation-next,
+.program-finder-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.program-finder-navigation {
+  justify-content: space-between;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid #e7ecf2;
+}
+
+.program-finder-navigation-next {
+  justify-content: flex-end;
+}
+
+.program-finder-navigation .button,
+.program-finder-actions .button,
+.program-finder-results-header .button {
+  min-height: 44px;
+}
+
+.program-finder-navigation .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.program-finder-skip {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: #475569;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.program-finder-skip:hover {
+  color: #1769c2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.program-finder-profile-choice {
+  padding: 24px;
+  border: 1px solid #e1e9f2;
+  border-radius: 14px;
+  background: #f5f8fc;
+}
+
+.program-finder-profile-choice h2 {
+  margin-top: 0;
+}
+
+.program-finder-actions {
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.program-finder-results-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.program-finder-results-kicker {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.program-finder-results-header h2 {
+  margin-top: 7px;
+}
+
+.program-finder-results-header > div {
+  min-width: 0;
+}
+
+.program-finder-answer-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 24px;
+}
+
+.program-finder-answer-summary span {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 6px 10px;
+  border: 1px solid #dbe8f7;
+  border-radius: 999px;
+  background: #f5f8fc;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.program-finder-results-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.program-finder-card-reasons {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e7ecf2;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.program-finder-registration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  color: #1769c2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.program-finder-why-heading {
+  margin: 0 0 4px;
+  color: #253044;
+  font-weight: 600;
+}
+
+.program-finder-card-reasons ul {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.program-finder-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 22px;
+  border: 1px solid #e1e9f2;
+  border-radius: 12px;
+  background: #f5f8fc;
+  color: #1769c2;
+}
+
+.program-finder-empty h3 {
+  margin: 0;
+  color: #253044;
+  font-size: 17px;
+}
+
+.program-finder-empty p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.program-finder-disclaimer {
+  margin: 20px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.program-finder-note {
+  display: flex;
+  width: min(100%, 744px);
+  align-items: center;
+  gap: 7px;
+  margin: 25px auto 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.program-finder-note svg {
+  flex: 0 0 auto;
+  color: #1769c2;
+}
+
+.program-finder-page :is(a, button, select):focus-visible {
+  outline: 3px solid #1769c2;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .program-finder-promo {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .homepage > .home-section.program-exploration {
+    padding-bottom: 18px;
+  }
+
+  .homepage > .home-section.program-finder-promo {
+    padding-top: 26px;
+    padding-bottom: 18px;
+  }
+
+  .homepage > .home-section.featured-programs {
+    padding-top: 28px;
+  }
+
+  .program-finder-promo-panel {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .program-finder-promo-icon {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+  }
+
+  .program-finder-promo-icon img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .program-finder-promo-copy {
+    flex: 1 1 calc(100% - 56px);
+  }
+
+  .program-finder-promo-copy h2 {
+    font-size: 17px;
+  }
+
+  .program-finder-promo-panel > .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .program-finder-page {
+    padding-bottom: 40px;
+  }
+
+  .program-finder-dialog {
+    width: 100%;
+    padding: 26px 20px 20px;
+  }
+
+  .program-finder-modal-intro {
+    margin-top: -4px;
+    font-size: 13px;
+  }
+
+  .program-finder-heading {
+    margin-top: 20px;
+  }
+
+  .program-finder-heading h1 {
+    margin-top: 14px;
+    font-size: 26px;
+  }
+
+  .program-finder-heading > p,
+  .program-finder-question > p,
+  .program-finder-profile-choice > p,
+  .program-finder-results-header > div > p {
+    font-size: 14px;
+  }
+
+  .program-finder-wizard,
+  .program-finder-profile-choice,
+  .program-finder-results {
+    margin-top: 24px;
+  }
+
+  .program-finder-question {
+    margin-top: 22px;
+  }
+
+  .program-finder-question h2,
+  .program-finder-profile-choice h2,
+  .program-finder-results-header h2 {
+    font-size: 21px;
+  }
+
+  .program-finder-options,
+  .program-finder-region-fields,
+  .program-finder-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .program-finder-option {
+    min-height: 52px;
+    padding: 11px 12px;
+  }
+
+  .program-finder-navigation {
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .program-finder-navigation .button {
+    min-height: 44px;
+    padding-right: 12px;
+    padding-left: 12px;
+    font-size: 13px;
+  }
+
+  .program-finder-navigation-next {
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .program-finder-region-fields .profile-field select { min-width: 0; font-size: 16px; }
+
+  .program-finder-skip {
+    padding: 0 8px;
+  }
+
+  .program-finder-profile-choice {
+    padding: 20px;
+  }
+
+  .program-finder-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .program-finder-actions .button {
+    justify-content: center;
+  }
+
+  .program-finder-results-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .program-finder-answer-summary {
+    margin-top: 16px;
+  }
+
+  .program-finder-empty {
+    padding: 18px;
+  }
+
+  .program-finder-empty .program-finder-actions {
+    align-items: stretch;
+  }
+}

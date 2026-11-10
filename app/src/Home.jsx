@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowRight, ArrowUpRight, CaretRight } from "@phosphor-icons/react";
 import { programs, programCategories, findItem } from "./data.js";
 import { InlinePersonalization } from "./Personalization.jsx";
@@ -13,7 +12,7 @@ import { homepageFaqItems } from "./faq.js";
 
 import { categoryImages } from "./category-images.js";
 
-export function Home({ navigate, save, plans }) {
+export function Home({ navigate, save, plans, onOpenFinder }) {
   const { account, sensitiveAnswers } = useAccount();
   const featured = selectHomepagePrograms(
     programs,
@@ -101,6 +100,22 @@ export function Home({ navigate, save, plans }) {
                 </span>
               </a>
             ))}
+          </div>
+        </div>
+      </section>
+      <section className="home-section program-finder-promo" aria-labelledby="program-finder-promo-title">
+        <div className="container">
+          <div className="program-finder-promo-panel">
+            <span className="program-finder-promo-icon" aria-hidden="true">
+              <img src="/program-finder-icon.png" alt="" width="38" height="38" />
+            </span>
+            <div className="program-finder-promo-copy">
+              <h2 id="program-finder-promo-title">Bingung memilih program yang sesuai?</h2>
+              <p>Jawab beberapa pertanyaan singkat untuk menemukan program yang relevan dengan kebutuhanmu.</p>
+            </div>
+            <button className="button primary" type="button" onClick={onOpenFinder}>
+              Cari program untukmu <ArrowRight size={18} />
+            </button>
           </div>
         </div>
       </section>

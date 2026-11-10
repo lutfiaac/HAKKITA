@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, SignOut } from "@phosphor-icons/react";
 import { useAccount } from "./AccountContext";
 import { Breadcrumb, PageIntro, Modal } from "./ui.jsx";
 import { programCategories } from "./taxonomy";
 import {
   activityOptions,
+  educationOptions,
   editableProfile,
   hasProfileInformation,
   profileDirty,
@@ -43,10 +44,11 @@ export function ProfileEditor({ navigate, registerNavigationGuard }) {
   const { account, saveProfile, clearProfileFeedback } = useAccount();
   const editing = hasProfileInformation(account.profile);
   const [draft, setDraft] = useState(() => editableProfile(account.profile));
-  const [displayName, setName] = useState(account.identity.displayName || "");
-  const [saving, setSaving] = useState(false),
-    [error, setError] = useState(""),
-    [nameError, setNameError] = useState("");
+  const [displayName, setDisplayName] = useState(
+    () => account.identity.displayName || "",
+  );
+  const [saving, setSaving] = useState(false), [error, setError] = useState("");
+  const [nameError, setNameError] = useState("");
   const [leaveOpen, setLeaveOpen] = useState(false);
   const savingRef = useRef(false),
     pending = useRef(null),
@@ -111,8 +113,8 @@ export function ProfileEditor({ navigate, registerNavigationGuard }) {
   async function submit(event) {
     event.preventDefault();
     if (savingRef.current) return;
-    if (!displayName.trim() || displayName.trim().length > 60) {
-      setNameError("Isi nama tampilan dengan 1–60 karakter.");
+    if (account.identity.displayName && !displayName.trim()) {
+      setNameError("Nama tidak boleh kosong.");
       nameInput.current?.focus();
       return;
     }
@@ -140,19 +142,20 @@ export function ProfileEditor({ navigate, registerNavigationGuard }) {
       setSaving(false);
     }
   }
-  const title = editing ? "Ubah profil" : "Lengkapi profilmu";
+  const fromProfile =
+    editing || new URLSearchParams(window.location.search).get("from") === "profile";
+  const title = "Atur Preferensi";
   return (
     <div className="container page profile-editor revised-profile-editor">
       <Breadcrumb
-        items={[{ label: "Profil Saya", href: "/profil" }, { label: title }]}
+        items={[
+          { label: "Profil Saya", href: "/profil" },
+          { label: "Atur Preferensi" },
+        ]}
       />
       <PageIntro
         title={title}
-        subtitle={
-          editing
-            ? "Perbarui informasi profilmu agar rekomendasi tetap sesuai kebutuhanmu."
-            : "Isi informasi yang sesuai dengan dirimu untuk membantu menemukan program yang lebih relevan."
-        }
+        subtitle="Pilih informasi yang sesuai dengan dirimu untuk mendapatkan rekomendasi program yang lebih relevan."
       />
       <form
         className="profile-form"
@@ -170,44 +173,37 @@ export function ProfileEditor({ navigate, registerNavigationGuard }) {
             {error}
           </p>
         )}
+        <div className="profile-field profile-name-field">
+          <label htmlFor="profile-name">Nama</label>
+          <input
+            id="profile-name"
+            ref={nameInput}
+            autoComplete="name"
+            maxLength={60}
+            value={displayName}
+            disabled={saving}
+            onChange={(event) => {
+              setDisplayName(event.target.value);
+              setNameError("");
+            }}
+            aria-invalid={Boolean(nameError)}
+            aria-describedby={nameError ? "profile-name-error" : undefined}
+          />
+          {nameError && (
+            <p className="profile-error" id="profile-name-error" role="alert">
+              {nameError}
+            </p>
+          )}
+        </div>
         <fieldset className="profile-editor-fields" disabled={saving}>
           <section>
-            <h2>Informasi akun</h2>
-            <div className="profile-field profile-name-field">
-              <label htmlFor="profile-name">Nama Lengkap</label>
-              <input
-                id="profile-name"
-                ref={nameInput}
-                autoComplete="nickname"
-                maxLength={60}
-                value={displayName}
-                onChange={(event) => {
-                  setName(event.target.value);
-                  setNameError("");
-                }}
-                aria-invalid={Boolean(nameError)}
-                aria-describedby={nameError ? "profile-name-error" : undefined}
-              />
-              {nameError && (
-                <p
-                  className="profile-error"
-                  id="profile-name-error"
-                  role="alert"
-                >
-                  {nameError}
-                </p>
-              )}
-            </div>
-          </section>
-          <section>
-            <h2>Informasi untuk rekomendasi</h2>
-            <h3>Wilayah domisili</h3>
+            <h2>Wilayah domisili</h2>
             <p>
-              Wilayah membantu menampilkan program yang tersedia di daerahmu.
+              Pilih wilayah tempat tinggalmu untuk menemukan program yang tersedia di daerahmu.
             </p>
             <div className="form-grid">
               <div className="profile-field">
-                <label htmlFor="profile-province">Provinsi (opsional)</label>
+                <label htmlFor="profile-province">Provinsi</label>
                 <select
                   id="profile-province"
                   value={draft.provinceCode}
@@ -238,7 +234,7 @@ export function ProfileEditor({ navigate, registerNavigationGuard }) {
                 </select>
               </div>
               <div className="profile-field">
-                <label htmlFor="profile-city">Kabupaten/kota (opsional)</label>
+                <label htmlFor="profile-city">Kabupaten/kota</label>
                 <select
                   id="profile-city"
                   value={draft.cityCode}
@@ -267,78 +263,106 @@ export function ProfileEditor({ navigate, registerNavigationGuard }) {
                 </select>
               </div>
             </div>
-            <div className="profile-form-group">
-              <h3>Kegiatan saat ini</h3>
-              <p>
-                Pilih kegiatan yang sesuai dengan keseharianmu. Kamu bisa
-                memilih lebih dari satu.
-              </p>
-              <ProfileChoices
-                name="activities"
-                legend="Kegiatan saat ini"
-                options={activityOptions}
-                values={draft.activities}
-                onChange={(value) => toggle("activities", value)}
-              />
-              {draft.activities.includes("lainnya") && (
-                <div className="profile-field profile-other-field">
-                  <label htmlFor="profile-other">
-                    Kegiatan lainnya (opsional)
-                  </label>
-                  <input
-                    id="profile-other"
-                    maxLength={100}
-                    value={draft.activitiesOther}
-                    onChange={(event) =>
-                      setDraft((previous) => ({
-                        ...previous,
-                        activitiesOther: event.target.value,
-                      }))
-                    }
-                    aria-describedby="profile-other-hint"
-                  />
-                  <p id="profile-other-hint" className="field-help">
-                    Catatan ini belum digunakan untuk mencocokkan persyaratan
-                    program.
-                  </p>
-                </div>
-              )}
+          </section>
+          <section>
+            <h2>Kegiatan saat ini</h2>
+            <p>
+              Pilih kegiatan yang sesuai dengan keseharianmu. Kamu bisa memilih
+              lebih dari satu.
+            </p>
+            <ProfileChoices
+              name="activities"
+              legend="Kegiatan saat ini"
+              options={activityOptions}
+              values={draft.activities}
+              onChange={(value) => toggle("activities", value)}
+            />
+            {draft.activities.includes("lainnya") && (
+              <div className="profile-field profile-other-field">
+                <label htmlFor="profile-other">
+                  Kegiatan lainnya (opsional)
+                </label>
+                <input
+                  id="profile-other"
+                  maxLength={100}
+                  value={draft.activitiesOther}
+                  onChange={(event) =>
+                    setDraft((previous) => ({
+                      ...previous,
+                      activitiesOther: event.target.value,
+                    }))
+                  }
+                  aria-describedby="profile-other-hint"
+                />
+                <p id="profile-other-hint" className="field-help">
+                  Catatan ini belum digunakan untuk mencocokkan persyaratan
+                  program.
+                </p>
+              </div>
+            )}
+          </section>
+          <section>
+            <h2>Jenjang pendidikan</h2>
+            <p>
+              Pilih jenjang pendidikanmu saat ini atau yang terakhir diselesaikan.
+            </p>
+            <div className="profile-field">
+              <label className="sr-only" htmlFor="profile-education">
+                Pilih jenjang pendidikan
+              </label>
+              <select
+                id="profile-education"
+                value={draft.education || ""}
+                onChange={(event) =>
+                  setDraft((previous) => ({
+                    ...previous,
+                    education: event.target.value,
+                  }))
+                }
+              >
+                <option value="">Pilih jenjang pendidikan</option>
+                {draft.education &&
+                  !educationOptions.some(([value]) => value === draft.education) && (
+                    <option value={draft.education}>{draft.education}</option>
+                  )}
+                {educationOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="profile-form-group">
-              <h3>Minat program</h3>
-              <p>
-                Pilih kategori program yang kamu minati. Kamu bisa memilih lebih
-                dari satu.
-              </p>
-              <ProfileChoices
-                name="interests"
-                legend="Bidang program yang diminati"
-                options={programCategories.map((category) => [
-                  category.id,
-                  category.name,
-                ])}
-                values={draft.interests}
-                onChange={(value) => toggle("interests", value)}
-              />
-            </div>
+          </section>
+          <section>
+            <h2>Minat program</h2>
+            <p>
+              Pilih kategori program yang kamu minati. Kamu bisa memilih lebih
+              dari satu.
+            </p>
+            <ProfileChoices
+              name="interests"
+              legend="Bidang program yang diminati"
+              options={programCategories.map((category) => [
+                category.id,
+                category.name,
+              ])}
+              values={draft.interests}
+              onChange={(value) => toggle("interests", value)}
+            />
           </section>
         </fieldset>
         <div className="profile-save-bar">
           <button type="submit" className="button primary" disabled={saving}>
-            {saving
-              ? "Menyimpan…"
-              : editing
-                ? "Simpan perubahan"
-                : "Simpan profil"}
+            {saving ? "Menyimpan..." : "Simpan preferensi"}
             <ArrowRight size={18} />
           </button>
           <button
             type="button"
-            className="text-button"
+            className="button secondary"
             disabled={saving}
-            onClick={() => navigate(editing ? "/profil" : "/program")}
+            onClick={() => navigate(fromProfile ? "/profil" : "/program")}
           >
-            {editing ? "Batal" : "Lewati untuk sekarang"}
+            {fromProfile ? "Batal" : "Lewati untuk sekarang"}
           </button>
         </div>
       </form>
@@ -395,6 +419,21 @@ export function ProfilePage({ navigate }) {
   const interests = (profile.interests || [])
     .map((value) => programCategories.find((item) => item.id === value)?.name)
     .filter(Boolean);
+  const educationValue = editableProfile(profile).education;
+  const education = educationOptions.find(
+    ([value]) => value === educationValue,
+  )?.[1] || educationValue;
+  const preferenceRows = [
+    {
+      label: "Wilayah domisili",
+      value: [location.province || profile.province, location.city || profile.city]
+        .filter(Boolean)
+        .join(", "),
+    },
+    { label: "Kegiatan saat ini", value: activities.join(", ") },
+    { label: "Jenjang pendidikan", value: education || "" },
+    { label: "Minat program", value: interests.join(", ") },
+  ].filter((row) => row.value);
   const closeConfirm = useCallback(() => {
     if (!busy.current) setConfirm(false);
   }, []);
@@ -422,7 +461,7 @@ export function ProfilePage({ navigate }) {
       <Breadcrumb items={[{ label: "Profil Saya" }]} />
       <PageIntro
         title="Profil Saya"
-        subtitle="Kelola informasi profilmu untuk mendapatkan rekomendasi program yang lebih relevan."
+        subtitle="Kelola informasi akun dan preferensi rekomendasimu."
       />
       {profileFeedback && (
         <p className="success-message" role="status">
@@ -430,7 +469,6 @@ export function ProfilePage({ navigate }) {
         </p>
       )}
       <section className="profile-account-section">
-        <h2>Informasi akun</h2>
         <div className="profile-account-identity">
           <AccountAvatar
             name={account.identity.displayName}
@@ -443,89 +481,78 @@ export function ProfilePage({ navigate }) {
         </div>
       </section>
       <section className="profile-information-section">
-        <h2>Informasi profil</h2>
+        <h2>Preferensi Rekomendasi</h2>
         {hasProfile ? (
           <>
             <dl className="profile-summary">
-              <div>
-                <dt>Wilayah domisili</dt>
-                <dd>
-                  {[
-                    location.province || profile.province,
-                    location.city || profile.city,
-                  ]
-                    .filter(Boolean)
-                    .join(", ") || "Belum diisi"}
-                </dd>
-              </div>
-              <div>
-                <dt>Kegiatan saat ini</dt>
-                <dd>
-                  {activities.join(", ") || "Belum diisi"}
-                  {profile.activities?.includes("lainnya") &&
-                    profile.activitiesOther && (
-                      <p className="profile-other-summary">
-                        {profile.activitiesOther}
-                      </p>
-                    )}
-                </dd>
-              </div>
-              <div>
-                <dt>Minat program</dt>
-                <dd>{interests.join(", ") || "Belum diisi"}</dd>
-              </div>
+              {preferenceRows.map((row) => (
+                <div key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>
+                    {row.value}
+                    {row.label === "Kegiatan saat ini" &&
+                      profile.activities?.includes("lainnya") &&
+                      profile.activitiesOther && (
+                        <p className="profile-other-summary">
+                          {profile.activitiesOther}
+                        </p>
+                      )}
+                  </dd>
+                </div>
+              ))}
             </dl>
             <div className="inline-actions">
-              <a href="/profil/edit" className="button primary">
-                Ubah profil <ArrowRight size={18} />
-              </a>
-              <a href="/program/rekomendasi" className="button secondary">
-                Lihat rekomendasi
+            <a href="/profil/edit?from=profile" className="button primary">
+                Ubah preferensi <ArrowRight size={18} />
               </a>
             </div>
           </>
         ) : (
           <div className="profile-simple-empty">
-            <h3>Informasi profil belum dilengkapi</h3>
+            <h3>Belum ada preferensi tersimpan</h3>
             <p>
-              Tambahkan informasi tentang dirimu untuk membantu menemukan
-              program yang sesuai kebutuhanmu.
+              Isi preferensimu agar HAKKITA dapat membantu menemukan program yang
+              lebih relevan.
             </p>
-            <a href="/profil/edit" className="button primary">
-              Lengkapi profil <ArrowRight size={18} />
+            <a href="/profil/edit?from=profile" className="button primary">
+              Atur preferensi <ArrowRight size={18} />
             </a>
           </div>
         )}
       </section>
       <section className="profile-account-settings">
         <h2>Pengaturan akun</h2>
-        <div>
+        <div className="profile-settings-list">
+          {hasProfile && (
+            <button
+              type="button"
+              className="profile-setting-row is-destructive"
+              onClick={() => {
+                setError("");
+                setConfirm(true);
+              }}
+            >
+              <span>
+                <strong>Hapus informasi profil</strong>
+                <small>
+                  Hapus preferensi rekomendasi tanpa menghapus akun atau program
+                  yang disimpan.
+                </small>
+              </span>
+              <ArrowRight size={18} />
+            </button>
+          )}
           <button
             type="button"
-            className="text-button"
-            onClick={() => {
-              setError("");
-              setConfirm(true);
-            }}
-          >
-            Hapus informasi profil
-          </button>
-          <p>
-            Hapus informasi personalisasi tanpa menghapus akun atau Rencanaku.
-          </p>
-        </div>
-        <div>
-          <button
-            type="button"
-            className="text-button"
+            className="profile-setting-row"
             onClick={() => navigate("/", logout)}
           >
-            Keluar dari akun
+            <span>
+              <strong>Keluar dari akun</strong>
+              <small>Akhiri sesi akun ini.</small>
+            </span>
+            <SignOut size={18} />
           </button>
-          <p>
-            Akhiri sesi akunmu. Informasi profil dan program yang disimpan tetap
-            tersedia.
-          </p>
         </div>
       </section>
       {confirm && (
@@ -535,8 +562,8 @@ export function ProfilePage({ navigate }) {
           onClose={closeConfirm}
         >
           <p>
-            Wilayah, kegiatan, dan minat program yang kamu simpan akan dihapus.
-            Akun dan Rencanaku tetap tersedia.
+            Wilayah, kegiatan, jenjang pendidikan, dan minat program yang kamu
+            simpan akan dihapus. Akun dan Rencanaku tetap tersedia.
           </p>
           {error && (
             <p className="profile-error" role="alert">

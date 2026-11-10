@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
@@ -12,6 +12,7 @@ import React, {
 import {
   blankSession,
   createLocalAccountAdapter,
+  readLocalSession,
   validateIdentity,
   persistentProfile,
 } from "./account-store";
@@ -24,6 +25,7 @@ import type {
 import {
   hasSessionDemo,
   readSessionDemo,
+  readSessionDemoStrict,
   writeSessionDemo,
   type SessionDemoIdentity,
 } from "./session-demo";
@@ -40,6 +42,8 @@ interface AccountContextValue {
   state: SessionSnapshot;
   account: AccountRecord | null;
   storageUnavailable: boolean;
+  storageLoadFailed: boolean;
+  retryStorageLoad: () => boolean;
   sessionDemo: boolean;
   startSessionDemo: (identity: SessionDemoIdentity) => void;
   register: (
@@ -59,27 +63,52 @@ interface AccountContextValue {
 }
 const AccountContext = createContext<AccountContextValue | null>(null);
 export function AccountProvider({ children }: { children: ReactNode }) {
-  const [storageUnavailable, setStorageUnavailable] = useState(false);
-  const [profileFeedback, setProfileFeedback] = useState("");
-  const clearProfileFeedback = useCallback(() => setProfileFeedback(""), []);
-  const persistedState = useRef<SessionSnapshot | null>(null);
-  const [sessionDemo, setSessionDemo] = useState(hasSessionDemo);
-  const [state, setState] = useState<SessionSnapshot>(() => {
+  const [initialSnapshot] = useState(() => {
+    const demo = hasSessionDemo();
     try {
-      return hasSessionDemo()
-        ? readSessionDemo()
-        : createLocalAccountAdapter(localStorage).read();
+      return {
+        state: demo ? readSessionDemoStrict() : readLocalSession(),
+        sessionDemo: demo,
+        failed: false,
+      };
     } catch {
-      return blankSession();
+      return { state: blankSession(), sessionDemo: demo, failed: true };
     }
   });
+  const [storageUnavailable, setStorageUnavailable] = useState(false);
+  const [storageLoadFailed, setStorageLoadFailed] = useState(
+    initialSnapshot.failed,
+  );
+  const [profileFeedback, setProfileFeedback] = useState("");
+  const clearProfileFeedback = useCallback(() => setProfileFeedback(""), []);
+  const persistedState = useRef<SessionSnapshot | null>(
+    initialSnapshot.failed ? null : initialSnapshot.state,
+  );
+  const [sessionDemo, setSessionDemo] = useState(initialSnapshot.sessionDemo);
+  const [state, setState] = useState<SessionSnapshot>(initialSnapshot.state);
   const [sensitiveAnswers, setSensitiveAnswers] = useState<
     Record<string, string>
   >({});
   const account = state.activeId
     ? state.accounts[state.activeId] || null
     : null;
+  const retryStorageLoad = useCallback(() => {
+    const demo = hasSessionDemo();
+    try {
+      const next = demo ? readSessionDemoStrict() : readLocalSession();
+      persistedState.current = next;
+      setState(next);
+      setSessionDemo(demo);
+      setStorageLoadFailed(false);
+      setStorageUnavailable(false);
+      return true;
+    } catch {
+      setStorageLoadFailed(true);
+      return false;
+    }
+  }, []);
   useEffect(() => {
+    if (storageLoadFailed) return;
     if (persistedState.current === state) return;
     try {
       if (sessionDemo) writeSessionDemo(state);
@@ -88,7 +117,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     } catch {
       setStorageUnavailable(true);
     }
-  }, [state, sessionDemo]);
+  }, [state, sessionDemo, storageLoadFailed]);
   function persistAccount(next: SessionSnapshot) {
     if (sessionDemo) writeSessionDemo(next);
     else createLocalAccountAdapter(localStorage).write(next);
@@ -98,7 +127,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }
   async function saveProfile(name: string, profile: Profile) {
     const trimmed = name.trim();
-    if (!account || !trimmed || trimmed.length > 60)
+    if (!account || trimmed.length > 60)
       return { ok: false, error: "Periksa kembali nama tampilanmu." };
     const id = account.identity.id;
     try {
@@ -108,7 +137,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
           ...state.accounts,
           [id]: {
             ...account,
-            identity: { ...account.identity, displayName: trimmed },
+            identity: trimmed
+              ? { ...account.identity, displayName: trimmed }
+              : account.identity,
             profile: persistentProfile(profile),
           },
         },
@@ -137,6 +168,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       email: identity.email.trim().toLowerCase(),
     };
     setSensitiveAnswers({});
+    setStorageLoadFailed(false);
     setSessionDemo(true);
     setState({
       activeId: safeIdentity.id,
@@ -172,6 +204,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       plans: {},
     };
     setSensitiveAnswers({});
+    setStorageLoadFailed(false);
     setState((p) => ({
       activeId: id,
       accounts: { ...p.accounts, [id]: record },
@@ -182,6 +215,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setProfileFeedback("");
     if (!state.accounts[id]) return false;
     setSensitiveAnswers({});
+    setStorageLoadFailed(false);
     setState((p) => ({ ...p, activeId: id }));
     return true;
   }
@@ -247,6 +281,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   };
   function resetSession() {
     setSensitiveAnswers({});
+    setStorageLoadFailed(false);
     setState(blankSession());
   }
   return (
@@ -255,6 +290,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         state,
         account,
         storageUnavailable,
+        storageLoadFailed,
+        retryStorageLoad,
         sessionDemo,
         startSessionDemo,
         saveProfile,
